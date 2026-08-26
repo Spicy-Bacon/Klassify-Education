@@ -233,8 +233,47 @@ describe('IdentityService scoped access', () => {
 
     expect(service.getVisibleAdminSections(principalContext)).toEqual(['overview', 'users', 'students', 'parents', 'staff', 'classes']);
     expect(service.getVisibleAdminSections(teacherContext)).toEqual(['overview', 'students', 'classes']);
-    expect(service.getVisibleAdminSections(parentContext)).toEqual(['overview', 'students']);
-    expect(service.getVisibleAdminSections(studentContext)).toEqual(['overview', 'students', 'classes']);
+    expect(service.getVisibleAdminSections(parentContext)).toEqual([]);
+    expect(service.getVisibleAdminSections(studentContext)).toEqual([]);
+  });
+
+  it('returns full admin navigation for school administrators', () => {
+    const service = createService();
+    const adminContext = contextFor(service, developmentIdentityIds.admin);
+
+    expect(service.canAccessAdminPortal(adminContext)).toBe(true);
+    expect(service.getVisibleAdminSections(adminContext)).toEqual(['overview', 'users', 'students', 'parents', 'staff', 'classes']);
+    expect(service.canAccessAdminSection(adminContext, 'users').ok).toBe(true);
+  });
+
+  it('blocks teacher direct access to protected school administration routes', () => {
+    const service = createService();
+    const teacherContext = contextFor(service, developmentIdentityIds.teacher3A);
+    const result = service.canAccessAdminSection(teacherContext, 'users');
+
+    expect(service.canAccessAdminPortal(teacherContext)).toBe(true);
+    expect(result.ok).toBe(false);
+    expect(result.ok ? undefined : result.error.code).toBe(DomainErrorCode.PermissionDenied);
+  });
+
+  it('denies parent users access to the Admin Portal', () => {
+    const service = createService();
+    const parentContext = contextFor(service, developmentIdentityIds.parentAmy);
+    const result = service.canAccessAdminSection(parentContext, 'students');
+
+    expect(service.canAccessAdminPortal(parentContext)).toBe(false);
+    expect(result.ok).toBe(false);
+    expect(result.ok ? undefined : result.error.message).toBe('You do not have access to the school administration portal.');
+  });
+
+  it('denies student users access to the Admin Portal', () => {
+    const service = createService();
+    const studentContext = contextFor(service, developmentIdentityIds.studentChloeUser);
+    const result = service.canAccessAdminSection(studentContext, 'classes');
+
+    expect(service.canAccessAdminPortal(studentContext)).toBe(false);
+    expect(result.ok).toBe(false);
+    expect(result.ok ? undefined : result.error.message).toBe('You do not have access to the school administration portal.');
   });
 });
 

@@ -1,7 +1,9 @@
+import type { ReactElement } from 'react';
 import { useMemo, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import type { DomainResult, EntityId, User } from '@ai-school-platform/contracts';
+import type { AuthenticatedUserContext, DomainResult, EntityId, User } from '@ai-school-platform/contracts';
 import { AdminLayout } from './AdminLayout';
+import { PermissionDenied } from './components/PermissionDenied';
 import { adminRoutes } from './routes';
 import { AdminHome } from './pages/AdminHome';
 import { ClassesPage } from './pages/ClassesPage';
@@ -34,7 +36,11 @@ export function AdminApp({
 
   const visibleRoutes = useMemo(() => {
     if (!userContext) {
-      return [adminRoutes[0]];
+      return [];
+    }
+
+    if (!identityService.canAccessAdminPortal(userContext)) {
+      return [];
     }
 
     const visibleRouteIds = identityService.getVisibleAdminSections(userContext);
@@ -55,6 +61,32 @@ export function AdminApp({
     return <p>Development identity could not be loaded.</p>;
   }
 
+  if (!identityService.canAccessAdminPortal(userContext)) {
+    return (
+      <AdminLayout
+        allowIdentitySwitching={allowIdentitySwitching}
+        currentUser={currentUser}
+        identityOptions={identityOptions}
+        message={message}
+        navigationRoutes={[]}
+        selectedUserId={selectedUserId}
+        onIdentityChange={setSelectedUserId}
+        revision={revision}
+      >
+        <PermissionDenied
+          title="School administration unavailable"
+          message="You do not have access to the school administration portal."
+        />
+      </AdminLayout>
+    );
+  }
+
+  const guarded = (sectionId: typeof adminRoutes[number]['id'], element: ReactElement) => (
+    <AdminRouteGuard identityService={identityService} sectionId={sectionId} userContext={userContext}>
+      {element}
+    </AdminRouteGuard>
+  );
+
   return (
     <Routes>
       <Route
@@ -72,14 +104,34 @@ export function AdminApp({
         )}
         path="/admin"
       >
-        <Route index element={<AdminHome service={identityService} userContext={userContext} />} />
-        <Route path="users" element={<UsersPage service={identityService} userContext={userContext} />} />
-        <Route path="students" element={<StudentsPage service={identityService} userContext={userContext} onAction={completeAction} />} />
-        <Route path="parents" element={<ParentsPage service={identityService} userContext={userContext} onAction={completeAction} />} />
-        <Route path="staff" element={<StaffPage service={identityService} userContext={userContext} onAction={completeAction} />} />
-        <Route path="classes" element={<ClassesPage service={identityService} userContext={userContext} onAction={completeAction} />} />
+        <Route index element={guarded('overview', <AdminHome service={identityService} userContext={userContext} />)} />
+        <Route path="users" element={guarded('users', <UsersPage service={identityService} userContext={userContext} />)} />
+        <Route path="students" element={guarded('students', <StudentsPage service={identityService} userContext={userContext} onAction={completeAction} />)} />
+        <Route path="parents" element={guarded('parents', <ParentsPage service={identityService} userContext={userContext} onAction={completeAction} />)} />
+        <Route path="staff" element={guarded('staff', <StaffPage service={identityService} userContext={userContext} onAction={completeAction} />)} />
+        <Route path="classes" element={guarded('classes', <ClassesPage service={identityService} userContext={userContext} onAction={completeAction} />)} />
       </Route>
       <Route path="*" element={<Navigate replace to="/admin" />} />
     </Routes>
   );
+}
+
+function AdminRouteGuard({
+  children,
+  identityService,
+  sectionId,
+  userContext,
+}: {
+  children: ReactElement;
+  identityService: IdentityService;
+  sectionId: typeof adminRoutes[number]['id'];
+  userContext: AuthenticatedUserContext;
+}) {
+  const access = identityService.canAccessAdminSection(userContext, sectionId);
+
+  if (!access.ok) {
+    return <PermissionDenied message={access.error.message} />;
+  }
+
+  return children;
 }

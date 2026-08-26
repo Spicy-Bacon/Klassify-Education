@@ -81,6 +81,22 @@ export class IdentityService {
     return this.can(userContext, Permission.ClassesManage, { schoolId: userContext.schoolId }).allowed;
   }
 
+  canAccessAdminPortal(userContext: AuthenticatedUserContext): boolean {
+    return this.accessPolicy.canViewSchoolAdministration(userContext) || userContext.role === Role.Teacher;
+  }
+
+  canAccessAdminSection(userContext: AuthenticatedUserContext, sectionId: AdminSectionId): DomainResult<true> {
+    if (!this.canAccessAdminPortal(userContext)) {
+      return failure(DomainErrorCode.PermissionDenied, 'You do not have access to the school administration portal.');
+    }
+
+    if (!this.getVisibleAdminSections(userContext).includes(sectionId)) {
+      return failure(DomainErrorCode.PermissionDenied, 'Your account does not have permission to access this section.');
+    }
+
+    return { ok: true, value: true };
+  }
+
   getVisibleAdminSections(userContext: AuthenticatedUserContext): AdminSectionId[] {
     if (this.accessPolicy.canViewSchoolAdministration(userContext)) {
       return ['overview', 'users', 'students', 'parents', 'staff', 'classes'];
@@ -90,15 +106,7 @@ export class IdentityService {
       return ['overview', 'students', 'classes'];
     }
 
-    if (userContext.role === Role.ParentGuardian) {
-      return ['overview', 'students'];
-    }
-
-    if (userContext.role === Role.Student) {
-      return ['overview', 'students', 'classes'];
-    }
-
-    return ['overview'];
+    return [];
   }
 
   getCurrentUser(userContext: AuthenticatedUserContext): DomainResult<User> {

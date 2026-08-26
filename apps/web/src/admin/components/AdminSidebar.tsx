@@ -6,6 +6,10 @@ export function AdminSidebar({ routes }: { routes: AdminRouteDefinition[] }) {
   const primaryRoutes = routes.filter((route) => route.group === 'primary');
   const peopleRoutes = routes.filter((route) => route.group === 'people');
 
+  if (routes.length === 0) {
+    return <aside className="admin-sidebar" aria-label="Admin Portal navigation" />;
+  }
+
   return (
     <aside className="admin-sidebar">
       <nav aria-label="Admin Portal">

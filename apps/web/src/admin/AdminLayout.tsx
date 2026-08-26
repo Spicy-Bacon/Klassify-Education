@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Outlet } from 'react-router-dom';
 import type { EntityId, User } from '@ai-school-platform/contracts';
 import { AdminSidebar } from './components/AdminSidebar';
@@ -14,8 +15,10 @@ export function AdminLayout({
   onIdentityChange,
   revision,
   selectedUserId,
+  children,
 }: {
   allowIdentitySwitching: boolean;
+  children?: ReactNode;
   currentUser?: User;
   identityOptions: IdentityOption[];
   message?: string;
@@ -37,7 +40,7 @@ export function AdminLayout({
         <AdminSidebar routes={navigationRoutes} />
         <section className="admin-content" aria-live="polite">
           {message ? <p className="notice">{message}</p> : null}
-          <Outlet />
+          {children ?? <Outlet />}
         </section>
       </div>
     </main>
