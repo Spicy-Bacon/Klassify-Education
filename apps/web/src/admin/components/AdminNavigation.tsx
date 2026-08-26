@@ -1,4 +1,4 @@
-import type { AdminRoute } from '../routes';
+import type { AdminRouteDefinition } from '../routes';
 
 export function AdminNavigation({
   currentPath,
@@ -6,7 +6,7 @@ export function AdminNavigation({
   onNavigate,
 }: {
   currentPath: string;
-  routes: AdminRoute[];
+  routes: AdminRouteDefinition[];
   onNavigate: (targetPath: string) => void;
 }) {
   return (
