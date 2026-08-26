@@ -1,21 +1,25 @@
 # Platform Contracts
 
-This package is reserved for future platform-neutral contracts shared across clients and services.
+This package contains platform-neutral contracts shared across clients and future services.
 
-Likely concepts include:
+Current identity and school structure concepts include:
 
 - School
 - User
 - Role
+- UserStatus
 - Student
+- StudentStatus
 - ParentGuardian
 - Staff
+- StaffProfile
+- GuardianProfile
+- YearGroup
 - Class
-- Announcement
-- Form
-- Event
-- MediaAsset
-- ConsentRecord
+- ClassEnrollment
+- GuardianStudentLink
+- StaffClassAssignment
+- Permission
 
 The permission model will eventually need to consider:
 
@@ -26,4 +30,4 @@ The permission model will eventually need to consider:
 - Explicit permission.
 - Media consent.
 
-Schemas and authorization rules are intentionally not implemented in this foundation commit.
+Schemas are intentionally still lightweight. Production persistence, authentication credentials and full authorization infrastructure remain deferred.

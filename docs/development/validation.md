@@ -15,6 +15,8 @@ ctest --test-dir build --output-on-failure
 ```bash
 cd apps/web
 npm install
+npm run lint
+npm test
 npm run build
 ```
 

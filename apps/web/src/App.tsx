@@ -1,8 +1,13 @@
 import './styles.css';
+import { AdminPortal } from './admin/AdminPortal';
 
 const pillars = ['Connect', 'Manage', 'Capture'];
 
 export function App() {
+  if (window.location.pathname.startsWith('/admin')) {
+    return <AdminPortal />;
+  }
+
   return (
     <main className="app-shell">
       <section className="intro" aria-labelledby="app-title">
@@ -13,6 +18,7 @@ export function App() {
             <span key={pillar}>{pillar}</span>
           ))}
         </div>
+        <a className="admin-link" href="/admin">Open Admin Portal</a>
       </section>
     </main>
   );
