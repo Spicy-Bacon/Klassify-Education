@@ -17,114 +17,32 @@ import {
   type PermissionDecision,
   type ResourceContext,
   type StaffClassAssignment,
-  type StaffProfile,
   type Student,
   type User,
-  type YearGroup,
-} from '../../../../packages/contracts/src';
+} from '@ai-school-platform/contracts';
+import { IdentityAccessPolicy } from './IdentityAccessPolicy';
 import type { IdentityRepository, IdentitySnapshot } from './identityRepository';
-
-export interface StudentInput {
-  schoolId: EntityId;
-  studentNumber: string;
-  firstName: string;
-  lastName: string;
-  preferredName?: string;
-  yearGroupId?: EntityId;
-}
-
-export interface StaffUserInput {
-  schoolId: EntityId;
-  displayName: string;
-  email: string;
-  role: Role.Teacher | Role.Staff | Role.SchoolAdmin | Role.ItAdmin | Role.Principal;
-  staffNumber?: string;
-  jobTitle?: string;
-  department?: string;
-}
-
-export interface GuardianUserInput {
-  schoolId: EntityId;
-  displayName: string;
-  email: string;
-}
-
-export interface ClassInput {
-  schoolId: EntityId;
-  yearGroupId?: EntityId;
-  name: string;
-  academicYear?: string;
-}
-
-export interface GuardianLinkInput {
-  schoolId: EntityId;
-  guardianUserId: EntityId;
-  studentId: EntityId;
-  relationshipType: GuardianRelationshipType;
-  isPrimary: boolean;
-}
-
-export interface StaffAssignmentInput {
-  schoolId: EntityId;
-  staffProfileId: EntityId;
-  staffUserId: EntityId;
-  classId: EntityId;
-  assignmentType: StaffClassAssignmentType;
-}
-
-export interface EnrollmentInput {
-  schoolId: EntityId;
-  studentId: EntityId;
-  classId: EntityId;
-  startDate?: string;
-}
-
-export interface StudentSummary {
-  student: Student;
-  yearGroup?: YearGroup;
-  className?: string;
-}
-
-export interface StaffSummary {
-  user: User;
-  profile?: StaffProfile;
-  assignedClassNames: string[];
-}
-
-export interface GuardianSummary {
-  user: User;
-  linkedChildren: StudentSummary[];
-}
-
-export interface ClassSummary {
-  class: Class;
-  yearGroup?: YearGroup;
-  students: Student[];
-  teachers: User[];
-}
-
-const schoolWideRoles = new Set<Role>([
-  Role.SchoolOwner,
-  Role.Principal,
-  Role.SchoolAdmin,
-  Role.ItAdmin,
-]);
-
-const staffRoles = new Set<Role>([
-  Role.SchoolOwner,
-  Role.Principal,
-  Role.SchoolAdmin,
-  Role.ItAdmin,
-  Role.Teacher,
-  Role.Staff,
-]);
+import type {
+  AdminSectionId,
+  AssignableTeacher,
+  ClassInput,
+  ClassSummary,
+  EnrollmentInput,
+  GuardianLinkInput,
+  GuardianSummary,
+  GuardianUserInput,
+  StaffAssignmentInput,
+  StaffSummary,
+  StaffUserInput,
+  StudentInput,
+  StudentSummary,
+} from './identityTypes';
 
 export class IdentityService {
-  constructor(private readonly repository: IdentityRepository) {}
-
-  getSnapshot(): IdentitySnapshot {
-    return this.repository.getSnapshot();
-  }
+  constructor(
+    private readonly repository: IdentityRepository,
+    private readonly accessPolicy = new IdentityAccessPolicy(),
+  ) {}
 
   createUserContext(userId: EntityId): DomainResult<AuthenticatedUserContext> {
     const snapshot = this.repository.getSnapshot();
@@ -152,66 +70,75 @@ export class IdentityService {
   }
 
   can(userContext: AuthenticatedUserContext, permission: Permission, resourceContext: ResourceContext): PermissionDecision {
-    const snapshot = this.repository.getSnapshot();
+    return this.accessPolicy.can(this.repository.getSnapshot(), userContext, permission, resourceContext);
+  }
 
-    if (userContext.schoolId !== resourceContext.schoolId) {
-      return { allowed: false, reason: 'Cross-school access is not allowed.' };
-    }
+  canManageUsers(userContext: AuthenticatedUserContext): boolean {
+    return this.can(userContext, Permission.SchoolManageUsers, { schoolId: userContext.schoolId }).allowed;
+  }
 
-    if (userContext.explicitPermissions?.includes(permission)) {
-      return { allowed: true };
-    }
+  canManageClasses(userContext: AuthenticatedUserContext): boolean {
+    return this.can(userContext, Permission.ClassesManage, { schoolId: userContext.schoolId }).allowed;
+  }
 
-    if (userContext.role === Role.SchoolOwner || userContext.role === Role.Principal) {
-      return { allowed: true };
-    }
-
-    if (userContext.role === Role.SchoolAdmin) {
-      return {
-        allowed: [
-          Permission.SchoolManageUsers,
-          Permission.UsersView,
-          Permission.ClassesView,
-          Permission.ClassesManage,
-          Permission.StudentsView,
-        ].includes(permission),
-      };
-    }
-
-    if (userContext.role === Role.ItAdmin) {
-      return {
-        allowed: [
-          Permission.SchoolManageUsers,
-          Permission.SchoolManageSettings,
-          Permission.UsersView,
-          Permission.ClassesView,
-        ].includes(permission),
-      };
+  getVisibleAdminSections(userContext: AuthenticatedUserContext): AdminSectionId[] {
+    if (this.accessPolicy.canViewSchoolAdministration(userContext)) {
+      return ['overview', 'users', 'students', 'parents', 'staff', 'classes'];
     }
 
     if (userContext.role === Role.Teacher) {
-      if (permission === Permission.ClassesView && resourceContext.classId) {
-        return { allowed: this.isTeacherAssignedToClass(snapshot, userContext.userId, resourceContext.classId) };
+      return ['overview', 'students', 'classes'];
+    }
+
+    if (userContext.role === Role.ParentGuardian) {
+      return ['overview', 'students'];
+    }
+
+    if (userContext.role === Role.Student) {
+      return ['overview', 'students', 'classes'];
+    }
+
+    return ['overview'];
+  }
+
+  getCurrentUser(userContext: AuthenticatedUserContext): DomainResult<User> {
+    const user = this.repository.getSnapshot().users.find((candidate) => candidate.id === userContext.userId);
+
+    if (!user) {
+      return failure(DomainErrorCode.NotFound, 'Current user was not found.');
+    }
+
+    return { ok: true, value: user };
+  }
+
+  getVisibleUsers(userContext: AuthenticatedUserContext): User[] {
+    const snapshot = this.repository.getSnapshot();
+    return snapshot.users.filter((user) => {
+      if (user.schoolId !== userContext.schoolId) {
+        return false;
       }
 
-      if (permission === Permission.StudentsView && resourceContext.studentId) {
-        return { allowed: this.isTeacherAssignedToStudent(snapshot, userContext.userId, resourceContext.studentId) };
+      if (this.accessPolicy.canViewSchoolAdministration(userContext)) {
+        return true;
       }
-    }
 
-    if (userContext.role === Role.ParentGuardian && permission === Permission.StudentsView && resourceContext.studentId) {
-      return { allowed: this.isGuardianLinkedToStudent(snapshot, userContext.userId, resourceContext.studentId) };
-    }
+      return user.id === userContext.userId;
+    });
+  }
 
-    if (userContext.role === Role.Student && permission === Permission.StudentsView && resourceContext.studentId) {
-      return { allowed: userContext.studentId === resourceContext.studentId };
-    }
+  getVisibleYearGroups(userContext: AuthenticatedUserContext) {
+    const snapshot = this.repository.getSnapshot();
+    const visibleClassYearGroupIds = new Set(this.getVisibleClasses(userContext).map((summary) => summary.class.yearGroupId));
+    const visibleStudentYearGroupIds = new Set(this.getVisibleStudents(userContext).map((summary) => summary.student.yearGroupId));
 
-    if (userContext.role === Role.Student && permission === Permission.ClassesView && resourceContext.classId) {
-      return { allowed: this.isStudentEnrolledInClass(snapshot, userContext.studentId, resourceContext.classId) };
-    }
-
-    return { allowed: false, reason: 'The requested permission is not granted for this role and resource.' };
+    return snapshot.yearGroups.filter((yearGroup) => (
+      yearGroup.schoolId === userContext.schoolId
+      && (
+        this.accessPolicy.canViewSchoolAdministration(userContext)
+        || visibleClassYearGroupIds.has(yearGroup.id)
+        || visibleStudentYearGroupIds.has(yearGroup.id)
+      )
+    ));
   }
 
   getVisibleStudents(userContext: AuthenticatedUserContext): StudentSummary[] {
@@ -219,7 +146,7 @@ export class IdentityService {
     return snapshot.students
       .filter((student) => student.schoolId === userContext.schoolId)
       .filter((student) => this.can(userContext, Permission.StudentsView, { schoolId: student.schoolId, studentId: student.id }).allowed)
-      .map((student) => this.toStudentSummary(snapshot, student));
+      .map((student) => toStudentSummary(snapshot, student));
   }
 
   getStudentById(userContext: AuthenticatedUserContext, studentId: EntityId): DomainResult<StudentSummary> {
@@ -235,7 +162,7 @@ export class IdentityService {
       return failure(DomainErrorCode.PermissionDenied, decision.reason ?? 'Student access is not allowed.');
     }
 
-    return { ok: true, value: this.toStudentSummary(snapshot, student) };
+    return { ok: true, value: toStudentSummary(snapshot, student) };
   }
 
   getVisibleClasses(userContext: AuthenticatedUserContext): ClassSummary[] {
@@ -243,22 +170,7 @@ export class IdentityService {
     return snapshot.classes
       .filter((schoolClass) => schoolClass.schoolId === userContext.schoolId)
       .filter((schoolClass) => this.can(userContext, Permission.ClassesView, { schoolId: schoolClass.schoolId, classId: schoolClass.id }).allowed)
-      .map((schoolClass) => this.toClassSummary(snapshot, schoolClass));
-  }
-
-  getVisibleUsers(userContext: AuthenticatedUserContext): User[] {
-    const snapshot = this.repository.getSnapshot();
-    return snapshot.users.filter((user) => {
-      if (user.schoolId !== userContext.schoolId) {
-        return false;
-      }
-
-      if (schoolWideRoles.has(userContext.role)) {
-        return true;
-      }
-
-      return user.id === userContext.userId;
-    });
+      .map((schoolClass) => toClassSummary(snapshot, schoolClass));
   }
 
   getClassById(userContext: AuthenticatedUserContext, classId: EntityId): DomainResult<ClassSummary> {
@@ -274,41 +186,69 @@ export class IdentityService {
       return failure(DomainErrorCode.PermissionDenied, decision.reason ?? 'Class access is not allowed.');
     }
 
-    return { ok: true, value: this.toClassSummary(snapshot, schoolClass) };
+    return { ok: true, value: toClassSummary(snapshot, schoolClass) };
   }
 
   getVisibleStaff(userContext: AuthenticatedUserContext): StaffSummary[] {
     const snapshot = this.repository.getSnapshot();
-    const canViewSchoolStaff = schoolWideRoles.has(userContext.role);
-    const users = snapshot.users.filter((user) => {
-      if (user.schoolId !== userContext.schoolId || !staffRoles.has(user.role)) {
-        return false;
-      }
-
-      return canViewSchoolStaff || user.id === userContext.userId;
-    });
-
-    return users.map((user) => this.toStaffSummary(snapshot, user));
+    return snapshot.users
+      .filter((user) => isStaffRole(user.role))
+      .filter((user) => user.schoolId === userContext.schoolId)
+      .filter((user) => this.accessPolicy.canViewSchoolAdministration(userContext) || user.id === userContext.userId)
+      .map((user) => toStaffSummary(snapshot, user));
   }
 
   getVisibleGuardians(userContext: AuthenticatedUserContext): GuardianSummary[] {
     const snapshot = this.repository.getSnapshot();
-    const guardians = snapshot.users.filter((user) => {
-      if (user.schoolId !== userContext.schoolId || user.role !== Role.ParentGuardian) {
-        return false;
-      }
+    return snapshot.users
+      .filter((user) => user.schoolId === userContext.schoolId && user.role === Role.ParentGuardian)
+      .filter((user) => this.accessPolicy.canViewSchoolAdministration(userContext) || user.id === userContext.userId)
+      .map((user) => toGuardianSummary(snapshot, user));
+  }
 
-      return schoolWideRoles.has(userContext.role) || user.id === userContext.userId;
-    });
+  getAssignableStudents(userContext: AuthenticatedUserContext): StudentSummary[] {
+    if (!this.canManageClasses(userContext)) {
+      return [];
+    }
 
-    return guardians.map((user) => ({
-      user,
-      linkedChildren: snapshot.guardianStudentLinks
-        .filter((link) => link.guardianUserId === user.id && link.status === RelationshipStatus.Active)
-        .map((link) => snapshot.students.find((student) => student.id === link.studentId))
-        .filter(isDefined)
-        .map((student) => this.toStudentSummary(snapshot, student)),
-    }));
+    const snapshot = this.repository.getSnapshot();
+    return snapshot.students
+      .filter((student) => student.schoolId === userContext.schoolId)
+      .map((student) => toStudentSummary(snapshot, student));
+  }
+
+  getAssignableTeachers(userContext: AuthenticatedUserContext): AssignableTeacher[] {
+    if (!this.canManageClasses(userContext)) {
+      return [];
+    }
+
+    const snapshot = this.repository.getSnapshot();
+    return snapshot.staffProfiles
+      .filter((profile) => profile.schoolId === userContext.schoolId)
+      .map((profile) => {
+        const user = snapshot.users.find((candidate) => candidate.id === profile.userId && candidate.role === Role.Teacher);
+        return user ? { user, profile } : undefined;
+      })
+      .filter(isDefined);
+  }
+
+  getLinkableGuardians(userContext: AuthenticatedUserContext): User[] {
+    if (!this.canManageUsers(userContext)) {
+      return [];
+    }
+
+    return this.repository.getSnapshot().users.filter((user) => user.schoolId === userContext.schoolId && user.role === Role.ParentGuardian);
+  }
+
+  getManageableClasses(userContext: AuthenticatedUserContext): ClassSummary[] {
+    if (!this.canManageClasses(userContext)) {
+      return [];
+    }
+
+    const snapshot = this.repository.getSnapshot();
+    return snapshot.classes
+      .filter((schoolClass) => schoolClass.schoolId === userContext.schoolId)
+      .map((schoolClass) => toClassSummary(snapshot, schoolClass));
   }
 
   createStudent(userContext: AuthenticatedUserContext, input: StudentInput): DomainResult<Student> {
@@ -469,78 +409,6 @@ export class IdentityService {
 
     return { ok: true, value: true };
   }
-
-  private isTeacherAssignedToClass(snapshot: IdentitySnapshot, staffUserId: EntityId, classId: EntityId): boolean {
-    return snapshot.staffClassAssignments.some((assignment) => assignment.staffUserId === staffUserId && assignment.classId === classId);
-  }
-
-  private isTeacherAssignedToStudent(snapshot: IdentitySnapshot, staffUserId: EntityId, studentId: EntityId): boolean {
-    const assignedClassIds = snapshot.staffClassAssignments
-      .filter((assignment) => assignment.staffUserId === staffUserId)
-      .map((assignment) => assignment.classId);
-
-    return snapshot.classEnrollments.some((enrollment) => (
-      enrollment.studentId === studentId
-      && enrollment.status === EnrollmentStatus.Active
-      && assignedClassIds.includes(enrollment.classId)
-    ));
-  }
-
-  private isGuardianLinkedToStudent(snapshot: IdentitySnapshot, guardianUserId: EntityId, studentId: EntityId): boolean {
-    return snapshot.guardianStudentLinks.some((link) => (
-      link.guardianUserId === guardianUserId
-      && link.studentId === studentId
-      && link.status === RelationshipStatus.Active
-    ));
-  }
-
-  private isStudentEnrolledInClass(snapshot: IdentitySnapshot, studentId: EntityId | undefined, classId: EntityId): boolean {
-    if (!studentId) {
-      return false;
-    }
-
-    return snapshot.classEnrollments.some((enrollment) => (
-      enrollment.studentId === studentId
-      && enrollment.classId === classId
-      && enrollment.status === EnrollmentStatus.Active
-    ));
-  }
-
-  private toStudentSummary(snapshot: IdentitySnapshot, student: Student): StudentSummary {
-    const yearGroup = snapshot.yearGroups.find((candidate) => candidate.id === student.yearGroupId);
-    const activeEnrollment = snapshot.classEnrollments.find((enrollment) => enrollment.studentId === student.id && enrollment.status === EnrollmentStatus.Active);
-    const schoolClass = activeEnrollment ? snapshot.classes.find((candidate) => candidate.id === activeEnrollment.classId) : undefined;
-
-    return {
-      student,
-      yearGroup,
-      className: schoolClass?.name,
-    };
-  }
-
-  private toStaffSummary(snapshot: IdentitySnapshot, user: User): StaffSummary {
-    const profile = snapshot.staffProfiles.find((candidate) => candidate.userId === user.id);
-    const assignedClassNames = snapshot.staffClassAssignments
-      .filter((assignment) => assignment.staffUserId === user.id)
-      .map((assignment) => snapshot.classes.find((schoolClass) => schoolClass.id === assignment.classId)?.name)
-      .filter(isDefined);
-
-    return { user, profile, assignedClassNames };
-  }
-
-  private toClassSummary(snapshot: IdentitySnapshot, schoolClass: Class): ClassSummary {
-    const yearGroup = snapshot.yearGroups.find((candidate) => candidate.id === schoolClass.yearGroupId);
-    const students = snapshot.classEnrollments
-      .filter((enrollment) => enrollment.classId === schoolClass.id && enrollment.status === EnrollmentStatus.Active)
-      .map((enrollment) => snapshot.students.find((student) => student.id === enrollment.studentId))
-      .filter(isDefined);
-    const teachers = snapshot.staffClassAssignments
-      .filter((assignment) => assignment.classId === schoolClass.id)
-      .map((assignment) => snapshot.users.find((user) => user.id === assignment.staffUserId))
-      .filter(isDefined);
-
-    return { class: schoolClass, yearGroup, students, teachers };
-  }
 }
 
 export function failure<T = never>(code: DomainErrorCode, message: string): DomainResult<T> {
@@ -554,3 +422,61 @@ export function isDefined<T>(value: T | undefined): value is T {
 export const relationshipTypeOptions = Object.values(GuardianRelationshipType);
 export const staffAssignmentTypeOptions = Object.values(StaffClassAssignmentType);
 export const studentStatusOptions = Object.values(StudentStatus);
+
+function toStudentSummary(snapshot: IdentitySnapshot, student: Student): StudentSummary {
+  const yearGroup = snapshot.yearGroups.find((candidate) => candidate.id === student.yearGroupId);
+  const activeEnrollment = snapshot.classEnrollments.find((enrollment) => enrollment.studentId === student.id && enrollment.status === EnrollmentStatus.Active);
+  const schoolClass = activeEnrollment ? snapshot.classes.find((candidate) => candidate.id === activeEnrollment.classId) : undefined;
+
+  return {
+    student,
+    yearGroup,
+    className: schoolClass?.name,
+  };
+}
+
+function toStaffSummary(snapshot: IdentitySnapshot, user: User): StaffSummary {
+  const profile = snapshot.staffProfiles.find((candidate) => candidate.userId === user.id);
+  const assignedClassNames = snapshot.staffClassAssignments
+    .filter((assignment) => assignment.staffUserId === user.id)
+    .map((assignment) => snapshot.classes.find((schoolClass) => schoolClass.id === assignment.classId)?.name)
+    .filter(isDefined);
+
+  return { user, profile, assignedClassNames };
+}
+
+function toGuardianSummary(snapshot: IdentitySnapshot, user: User): GuardianSummary {
+  return {
+    user,
+    linkedChildren: snapshot.guardianStudentLinks
+      .filter((link) => link.guardianUserId === user.id && link.status === RelationshipStatus.Active)
+      .map((link) => snapshot.students.find((student) => student.id === link.studentId))
+      .filter(isDefined)
+      .map((student) => toStudentSummary(snapshot, student)),
+  };
+}
+
+function toClassSummary(snapshot: IdentitySnapshot, schoolClass: Class): ClassSummary {
+  const yearGroup = snapshot.yearGroups.find((candidate) => candidate.id === schoolClass.yearGroupId);
+  const students = snapshot.classEnrollments
+    .filter((enrollment) => enrollment.classId === schoolClass.id && enrollment.status === EnrollmentStatus.Active)
+    .map((enrollment) => snapshot.students.find((student) => student.id === enrollment.studentId))
+    .filter(isDefined);
+  const teachers = snapshot.staffClassAssignments
+    .filter((assignment) => assignment.classId === schoolClass.id)
+    .map((assignment) => snapshot.users.find((user) => user.id === assignment.staffUserId))
+    .filter(isDefined);
+
+  return { class: schoolClass, yearGroup, students, teachers };
+}
+
+function isStaffRole(role: Role) {
+  return [
+    Role.SchoolOwner,
+    Role.Principal,
+    Role.SchoolAdmin,
+    Role.ItAdmin,
+    Role.Teacher,
+    Role.Staff,
+  ].includes(role);
+}

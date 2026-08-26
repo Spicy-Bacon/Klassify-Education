@@ -19,7 +19,7 @@ import {
   type Student,
   type User,
   type YearGroup,
-} from '../../../../packages/contracts/src';
+} from '@ai-school-platform/contracts';
 import type { IdentityRepository, IdentitySnapshot } from './identityRepository';
 import type {
   ClassInput,
@@ -29,7 +29,7 @@ import type {
   StaffAssignmentInput,
   StaffUserInput,
   StudentInput,
-} from './identityService';
+} from './identityTypes';
 
 const createdAt = '2026-08-26T00:00:00.000Z';
 

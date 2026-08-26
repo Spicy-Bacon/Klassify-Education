@@ -83,6 +83,18 @@ The permission vocabulary is intentionally small and module-oriented:
 
 The current permission function is deterministic and local. It is designed to be replaced later by a backend-backed policy decision point without changing UI components.
 
+The access policy separates capability from resource scope:
+
+```text
+Can the user perform this capability?
+            +
+Is the requested resource inside the user's school, class or student scope?
+            =
+Access decision
+```
+
+Explicit permissions grant capabilities only. They do not bypass resource scope. For example, a parent with `students.view` still cannot view a student unless an active `GuardianStudentLink` connects them.
+
 Initial access behavior:
 
 - Principal and school owner can access school-wide identity records in their own school only.
@@ -97,6 +109,35 @@ Initial access behavior:
 `AuthenticatedUserContext` represents the authenticated actor. It contains user ID, school ID, role, optional student ID and optional explicit permissions.
 
 The web app includes a development-only identity switcher guarded by `import.meta.env.DEV`. It lets developers switch between mock users to test scoped access before production authentication is selected.
+
+Development identity data is selected only from the development application composition. Production-safe application composition does not create a `DevelopmentIdentityRepository`, does not select `Demo Principal`, and displays an explicit authentication-not-configured state until a real authentication boundary is implemented.
+
+```text
+Application
+  |
+  +-- production-safe composition
+  |     +-- Authentication is not configured
+  |
+  +-- development composition
+        +-- IdentityService
+              +-- IdentityRepository
+                    +-- DevelopmentIdentityRepository
+```
+
+UI components depend on scoped service methods such as `getVisibleStudents`, `getVisibleClasses`, `getAssignableStudents`, `getAssignableTeachers`, `getManageableClasses` and `getLinkableGuardians`. They do not retrieve all repository data and manually decide what to hide.
+
+Repository snapshots remain available to repository internals, the service layer, development composition and tests. They are not the normal UI query API.
+
+## Workspace Structure
+
+The JavaScript/TypeScript code uses a root npm workspace:
+
+```text
+apps/web
+packages/contracts
+```
+
+The web app consumes shared identity contracts through `@ai-school-platform/contracts` instead of source-relative imports into `packages/contracts`.
 
 ## Deferred
 

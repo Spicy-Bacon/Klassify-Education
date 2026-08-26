@@ -10,7 +10,7 @@ import type {
   Student,
   User,
   YearGroup,
-} from '../../../../packages/contracts/src';
+} from '@ai-school-platform/contracts';
 import type {
   ClassInput,
   EnrollmentInput,
@@ -19,7 +19,7 @@ import type {
   StaffAssignmentInput,
   StaffUserInput,
   StudentInput,
-} from './identityService';
+} from './identityTypes';
 
 export interface IdentitySnapshot {
   schools: School[];

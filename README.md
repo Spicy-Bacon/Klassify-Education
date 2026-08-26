@@ -40,6 +40,8 @@ The first real product feature establishes the school-owned identity foundation 
 
 The implementation is intentionally platform-neutral and development-only where persistence or authentication would otherwise be required. Production authentication, database and backend infrastructure choices remain deferred.
 
+The web app consumes shared contracts through the npm workspace package `@ai-school-platform/contracts`.
+
 ## Branch Strategy
 
 ```text
@@ -81,11 +83,10 @@ The desktop target is configured only when Qt Widgets is available.
 ### Web
 
 ```bash
-cd apps/web
 npm install
-npm run lint
-npm test
-npm run build
+npm run lint --workspace apps/web
+npm test --workspace apps/web
+npm run build --workspace apps/web
 ```
 
 ### Android

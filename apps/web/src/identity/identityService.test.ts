@@ -3,9 +3,9 @@ import {
   DomainErrorCode,
   GuardianRelationshipType,
   Permission,
-  Role,
   StaffClassAssignmentType,
-} from '../../../../packages/contracts/src';
+} from '@ai-school-platform/contracts';
+import { createUnconfiguredIdentityApplication, isConfiguredIdentityApplication } from './applicationIdentity';
 import { DevelopmentIdentityRepository, developmentIdentityIds } from './developmentIdentityRepository';
 import { IdentityService } from './identityService';
 
@@ -114,6 +114,32 @@ describe('IdentityService relationships', () => {
 });
 
 describe('IdentityService scoped access', () => {
+  it('does not let explicit student view capability bypass parent resource scope', () => {
+    const service = createService();
+    const parentContext = {
+      ...contextFor(service, developmentIdentityIds.parentAmy),
+      explicitPermissions: [Permission.StudentsView],
+    };
+
+    const unrelatedResult = service.getStudentById(parentContext, developmentIdentityIds.studentMaya);
+
+    expect(unrelatedResult.ok).toBe(false);
+    expect(unrelatedResult.ok ? undefined : unrelatedResult.error.code).toBe(DomainErrorCode.PermissionDenied);
+  });
+
+  it('does not let explicit student view capability bypass teacher class scope', () => {
+    const service = createService();
+    const teacherContext = {
+      ...contextFor(service, developmentIdentityIds.teacher3A),
+      explicitPermissions: [Permission.StudentsView],
+    };
+
+    const protectedResult = service.getStudentById(teacherContext, developmentIdentityIds.studentNoah);
+
+    expect(protectedResult.ok).toBe(false);
+    expect(protectedResult.ok ? undefined : protectedResult.error.code).toBe(DomainErrorCode.PermissionDenied);
+  });
+
   it('limits a teacher to assigned classes and students', () => {
     const service = createService();
     const teacherContext = contextFor(service, developmentIdentityIds.teacher3A);
@@ -155,6 +181,16 @@ describe('IdentityService scoped access', () => {
     ]);
   });
 
+  it('prevents a student from accessing another student profile', () => {
+    const service = createService();
+    const studentContext = contextFor(service, developmentIdentityIds.studentChloeUser);
+
+    const otherStudent = service.getStudentById(studentContext, developmentIdentityIds.studentMaya);
+
+    expect(otherStudent.ok).toBe(false);
+    expect(otherStudent.ok ? undefined : otherStudent.error.code).toBe(DomainErrorCode.PermissionDenied);
+  });
+
   it('allows a student to see their own class relationship only', () => {
     const service = createService();
     const studentContext = contextFor(service, developmentIdentityIds.studentChloeUser);
@@ -187,9 +223,30 @@ describe('IdentityService scoped access', () => {
     expect(service.getVisibleStudents(principalContext)).toHaveLength(4);
     expect(service.can(principalContext, Permission.UsersView, { schoolId: developmentIdentityIds.otherSchool }).allowed).toBe(false);
   });
+
+  it('returns permission-aware admin sections for scoped identities', () => {
+    const service = createService();
+    const principalContext = contextFor(service, developmentIdentityIds.principal);
+    const teacherContext = contextFor(service, developmentIdentityIds.teacher3A);
+    const parentContext = contextFor(service, developmentIdentityIds.parentAmy);
+    const studentContext = contextFor(service, developmentIdentityIds.studentChloeUser);
+
+    expect(service.getVisibleAdminSections(principalContext)).toEqual(['overview', 'users', 'students', 'parents', 'staff', 'classes']);
+    expect(service.getVisibleAdminSections(teacherContext)).toEqual(['overview', 'students', 'classes']);
+    expect(service.getVisibleAdminSections(parentContext)).toEqual(['overview', 'students']);
+    expect(service.getVisibleAdminSections(studentContext)).toEqual(['overview', 'students', 'classes']);
+  });
 });
 
 describe('IdentityService validation', () => {
+  it('does not configure a demo identity in the production-safe application state', () => {
+    const application = createUnconfiguredIdentityApplication();
+
+    expect(isConfiguredIdentityApplication(application)).toBe(false);
+    expect(application.identityOptions).toEqual([]);
+    expect('initialUserId' in application).toBe(false);
+  });
+
   it('rejects student creation without required fields', () => {
     const service = createService();
     const adminContext = contextFor(service, developmentIdentityIds.admin);
@@ -229,6 +286,36 @@ describe('IdentityService validation', () => {
 
     expect(result.ok).toBe(false);
     expect(result.ok ? undefined : result.error.code).toBe(DomainErrorCode.PermissionDenied);
+  });
+
+  it('rejects user and relationship writes from a teacher without manage permission', () => {
+    const service = createService();
+    const teacherContext = contextFor(service, developmentIdentityIds.teacher3A);
+
+    const createStudent = service.createStudent(teacherContext, {
+      schoolId: developmentIdentityIds.demoSchool,
+      studentNumber: 'S-4000',
+      firstName: 'Blocked',
+      lastName: 'Student',
+    });
+    const linkGuardian = service.createGuardianStudentLink(teacherContext, {
+      schoolId: developmentIdentityIds.demoSchool,
+      guardianUserId: developmentIdentityIds.parentAmy,
+      studentId: developmentIdentityIds.studentMaya,
+      relationshipType: GuardianRelationshipType.Guardian,
+      isPrimary: false,
+    });
+    const assignTeacher = service.createStaffClassAssignment(teacherContext, {
+      schoolId: developmentIdentityIds.demoSchool,
+      staffProfileId: developmentIdentityIds.staffTeacher3A,
+      staffUserId: developmentIdentityIds.teacher3A,
+      classId: developmentIdentityIds.class3B,
+      assignmentType: StaffClassAssignmentType.SubjectTeacher,
+    });
+
+    expect(createStudent.ok).toBe(false);
+    expect(linkGuardian.ok).toBe(false);
+    expect(assignTeacher.ok).toBe(false);
   });
 
   it('creates a valid new student and enrolment through the service boundary', () => {
