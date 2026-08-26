@@ -1,0 +1,118 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+secrets/
+credentials/
+
+# Sensitive operational data and production media
+school-data/
+student-data/
+parent-data/
+production-media/
+generated-media/
+media-cache/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.bak
+*.swp
+*.swo
+~$*
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Node / React
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+.turbo/
+.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# C++ / CMake
+CMakeCache.txt
+CMakeFiles/
+cmake-build-*/
+build-*/
+out/
+Testing/
+CTestTestfile.cmake
+compile_commands.json
+install_manifest.txt
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.pdb
+
+# Qt
+*.pro.user
+*.qbs.user
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.vcxproj.user
+*.opensdf
+*.sdf
+*.ipch
+x64/
+x86/
+Win32/
+
+# VS Code local state
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# JetBrains
+.idea/
+
+# Android / Gradle
+.gradle/
+local.properties
+captures/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Xcode / iOS
+DerivedData/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+Package.resolved
