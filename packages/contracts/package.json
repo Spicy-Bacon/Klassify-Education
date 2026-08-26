@@ -1,0 +1,10 @@
+{
+  "name": "@ai-school-platform/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "types": "./src/index.ts",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

@@ -4,6 +4,8 @@ AI School Platform is a modular school operations, communication, AI and media e
 
 Development status: **Pre-MVP / Foundation Stage**
 
+Current active product area: **Identity & School Structure**
+
 ## Product
 
 The product is organized around three pillars.
@@ -31,6 +33,14 @@ Photography, private media and future high-performance media services, including
 | `core` | Shared C++20 client core for performance-sensitive cross-platform logic. |
 | `services` | Placeholder for backend decisions that are intentionally open. |
 | `packages/contracts` | Placeholder for future platform-neutral contracts and shared concepts. |
+
+## Identity & School Structure
+
+The first real product feature establishes the school-owned identity foundation for schools, users, staff profiles, guardian profiles, students, year groups, classes, student enrolments, staff-class assignments, guardian-student links, roles and a small permission vocabulary.
+
+The implementation is intentionally platform-neutral and development-only where persistence or authentication would otherwise be required. Production authentication, database and backend infrastructure choices remain deferred.
+
+The web app consumes shared contracts through the npm workspace package `@ai-school-platform/contracts`.
 
 ## Branch Strategy
 
@@ -73,9 +83,10 @@ The desktop target is configured only when Qt Widgets is available.
 ### Web
 
 ```bash
-cd apps/web
 npm install
-npm run build
+npm run lint --workspace apps/web
+npm test --workspace apps/web
+npm run build --workspace apps/web
 ```
 
 ### Android

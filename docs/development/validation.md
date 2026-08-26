@@ -12,11 +12,18 @@ ctest --test-dir build --output-on-failure
 
 ## Web
 
+From the repository root:
+
 ```bash
-cd apps/web
 npm install
-npm run build
+npm run lint --workspace apps/web
+npm test --workspace apps/web
+npm run build --workspace apps/web
 ```
+
+Use `npm ci` instead of `npm install` in clean CI environments once `package-lock.json` is present.
+
+GitHub Actions runs these checks for pull requests and pushes to `develop`.
 
 ## Desktop
 
@@ -29,3 +36,5 @@ Use Android Studio or Gradle from `apps/android` when the Android SDK is availab
 ## iOS
 
 Use Xcode once a project file or generator workflow has been selected.
+
+On non-macOS environments, document that iOS build validation was not performed.
