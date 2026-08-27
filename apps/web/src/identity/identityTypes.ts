@@ -3,6 +3,7 @@ import type {
   Class,
   EntityId,
   GuardianRelationshipType,
+  School,
   StaffProfile,
   Student,
   User,
@@ -123,6 +124,18 @@ export interface ClassSummary {
 export interface AssignableTeacher {
   user: User;
   profile: StaffProfile;
+}
+
+export interface AdminOverviewMetric {
+  label: string;
+  value: number;
+}
+
+export interface AdminOverview {
+  school?: School;
+  metrics: AdminOverviewMetric[];
+  classes: ClassSummary[];
+  canUseManagementActions: boolean;
 }
 
 export type AdminSectionId = 'overview' | 'users' | 'students' | 'parents' | 'staff' | 'classes';

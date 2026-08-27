@@ -224,6 +224,29 @@ describe('IdentityService scoped access', () => {
     expect(service.can(principalContext, Permission.UsersView, { schoolId: developmentIdentityIds.otherSchool }).allowed).toBe(false);
   });
 
+  it('returns school-wide overview metrics for principals', () => {
+    const service = createService();
+    const principalContext = contextFor(service, developmentIdentityIds.principal);
+    const overview = service.getAdminOverview(principalContext);
+
+    expect(overview.school?.name).toBe('Demo School');
+    expect(overview.metrics).toContainEqual({ label: 'Students', value: 4 });
+    expect(overview.metrics).toContainEqual({ label: 'Parents / Guardians', value: 2 });
+    expect(overview.metrics).toContainEqual({ label: 'Classes', value: 3 });
+    expect(overview.canUseManagementActions).toBe(true);
+  });
+
+  it('returns scoped overview metrics for teachers', () => {
+    const service = createService();
+    const teacherContext = contextFor(service, developmentIdentityIds.teacher3A);
+    const overview = service.getAdminOverview(teacherContext);
+
+    expect(overview.metrics).toContainEqual({ label: 'Students', value: 2 });
+    expect(overview.metrics).toContainEqual({ label: 'Classes', value: 1 });
+    expect(overview.classes.map((summary) => summary.class.id)).toEqual([developmentIdentityIds.class3A]);
+    expect(overview.canUseManagementActions).toBe(false);
+  });
+
   it('returns permission-aware admin sections for scoped identities', () => {
     const service = createService();
     const principalContext = contextFor(service, developmentIdentityIds.principal);

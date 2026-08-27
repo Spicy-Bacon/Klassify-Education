@@ -16,6 +16,7 @@ import {
   type GuardianStudentLink,
   type PermissionDecision,
   type ResourceContext,
+  type School,
   type StaffClassAssignment,
   type Student,
   type User,
@@ -24,6 +25,7 @@ import { IdentityAccessPolicy } from './IdentityAccessPolicy';
 import type { IdentityRepository, IdentitySnapshot } from './identityRepository';
 import type {
   AdminSectionId,
+  AdminOverview,
   AssignableTeacher,
   ClassInput,
   ClassSummary,
@@ -117,6 +119,38 @@ export class IdentityService {
     }
 
     return { ok: true, value: user };
+  }
+
+  getCurrentSchool(userContext: AuthenticatedUserContext): DomainResult<School> {
+    const school = this.repository.getSnapshot().schools.find((candidate) => candidate.id === userContext.schoolId);
+
+    if (!school) {
+      return failure(DomainErrorCode.NotFound, 'School was not found.');
+    }
+
+    return { ok: true, value: school };
+  }
+
+  getAdminOverview(userContext: AuthenticatedUserContext): AdminOverview {
+    const schoolResult = this.getCurrentSchool(userContext);
+    const classes = this.getVisibleClasses(userContext);
+    const students = this.getVisibleStudents(userContext);
+    const staff = this.getVisibleStaff(userContext);
+    const parents = this.getVisibleGuardians(userContext);
+    const users = this.getVisibleUsers(userContext);
+
+    return {
+      school: schoolResult.ok ? schoolResult.value : undefined,
+      metrics: [
+        { label: 'Students', value: students.length },
+        { label: 'Parents / Guardians', value: parents.length },
+        { label: 'Staff', value: staff.length },
+        { label: 'Classes', value: classes.length },
+        { label: 'Users', value: users.length },
+      ],
+      classes,
+      canUseManagementActions: this.canManageUsers(userContext) || this.canManageClasses(userContext),
+    };
   }
 
   getVisibleUsers(userContext: AuthenticatedUserContext): User[] {

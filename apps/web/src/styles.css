@@ -278,6 +278,38 @@ button[type="submit"] {
   font-size: 2rem;
 }
 
+.dashboard-section {
+  margin-top: 24px;
+}
+
+.dashboard-section h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+}
+
+.quick-actions,
+.disabled-module-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.quick-actions a,
+.disabled-module-list span {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 9px 12px;
+  color: #1f2937;
+  background: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.disabled-module-list span {
+  color: #94a3b8;
+  background: #f8fafc;
+}
+
 .table-wrap {
   overflow-x: auto;
   border: 1px solid #d7dde5;
