@@ -5,6 +5,7 @@ import { futureAdminRoutes } from '../routes';
 export function AdminSidebar({ routes }: { routes: AdminRouteDefinition[] }) {
   const primaryRoutes = routes.filter((route) => route.group === 'primary');
   const peopleRoutes = routes.filter((route) => route.group === 'people');
+  const communicationRoutes = routes.filter((route) => route.group === 'communication');
 
   if (routes.length === 0) {
     return <aside className="admin-sidebar" aria-label="Admin Portal navigation" />;
@@ -18,6 +19,12 @@ export function AdminSidebar({ routes }: { routes: AdminRouteDefinition[] }) {
           <div className="nav-section">
             <p>People</p>
             <NavGroup routes={peopleRoutes} />
+          </div>
+        ) : null}
+        {communicationRoutes.length > 0 ? (
+          <div className="nav-section">
+            <p>Communication</p>
+            <NavGroup routes={communicationRoutes} />
           </div>
         ) : null}
         <div className="nav-section nav-section-disabled">

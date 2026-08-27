@@ -1,3 +1,5 @@
+import { AnnouncementService } from '../announcements/AnnouncementService';
+import { DevelopmentAnnouncementRepository } from '../announcements/DevelopmentAnnouncementRepository';
 import { DevelopmentIdentityRepository, developmentIdentityIds } from './developmentIdentityRepository';
 import { IdentityService } from './identityService';
 import type { ConfiguredIdentityApplication } from './identityTypes';
@@ -9,6 +11,7 @@ export function createDevelopmentIdentityApplication(): ConfiguredIdentityApplic
 
   const repository = new DevelopmentIdentityRepository();
   const service = new IdentityService(repository);
+  const announcementService = new AnnouncementService(new DevelopmentAnnouncementRepository(), service);
   const snapshot = repository.getSnapshot();
   const identityIds = [
     developmentIdentityIds.principal,
@@ -21,6 +24,7 @@ export function createDevelopmentIdentityApplication(): ConfiguredIdentityApplic
   return {
     mode: 'development',
     identityService: service,
+    announcementService,
     initialUserId: developmentIdentityIds.principal,
     identityOptions: identityIds.map((id) => {
       const user = snapshot.users.find((candidate) => candidate.id === id);

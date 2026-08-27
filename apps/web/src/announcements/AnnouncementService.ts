@@ -35,6 +35,10 @@ export class AnnouncementService {
     private readonly audienceResolver = new AnnouncementAudienceResolver(),
   ) {}
 
+  canCreate(userContext: AuthenticatedUserContext): boolean {
+    return this.accessPolicy.canCreate(userContext, userContext.schoolId).ok;
+  }
+
   createDraft(userContext: AuthenticatedUserContext, input: AnnouncementInput): DomainResult<Announcement> {
     const baseValidation = this.validateWritableDraft(userContext, input);
     if (!baseValidation.ok) {

@@ -8,6 +8,7 @@ import {
 import { DevelopmentIdentityRepository, developmentIdentityIds } from '../identity/developmentIdentityRepository';
 import { IdentityService } from '../identity/identityService';
 import { DevelopmentAnnouncementRepository } from './DevelopmentAnnouncementRepository';
+import { developmentAnnouncementIds } from './DevelopmentAnnouncementRepository';
 import { AnnouncementService } from './AnnouncementService';
 
 function createServices() {
@@ -218,5 +219,60 @@ describe('AnnouncementService domain foundation', () => {
 
     expect(preview.ok).toBe(true);
     expect(preview.ok ? preview.value.countsByGroup.staff : undefined).toBe(1);
+  });
+});
+
+describe('AnnouncementService administration views', () => {
+  it('exposes announcement navigation to administrators and teachers only', () => {
+    const { identityService } = createServices();
+    const adminContext = contextFor(identityService, developmentIdentityIds.admin);
+    const teacherContext = contextFor(identityService, developmentIdentityIds.teacher3A);
+    const parentContext = contextFor(identityService, developmentIdentityIds.parentAmy);
+
+    expect(identityService.getVisibleAdminSections(adminContext)).toContain('announcements');
+    expect(identityService.getVisibleAdminSections(teacherContext)).toContain('announcements');
+    expect(identityService.canAccessAdminSection(parentContext, 'announcements').ok).toBe(false);
+  });
+
+  it('shows school-wide announcement lists to school administrators', () => {
+    const { announcementService, identityService } = createServices();
+    const adminContext = contextFor(identityService, developmentIdentityIds.admin);
+
+    const announcements = announcementService.getVisibleAnnouncements(adminContext);
+
+    expect(announcements.map((item) => item.announcement.id).sort()).toEqual([
+      developmentAnnouncementIds.holidayNotice,
+      developmentAnnouncementIds.museumTrip,
+      developmentAnnouncementIds.sportsDay,
+    ].sort());
+  });
+
+  it('scopes teacher announcement lists to authored or assigned-class announcements', () => {
+    const { announcementService, identityService } = createServices();
+    const teacherContext = contextFor(identityService, developmentIdentityIds.teacher3A);
+
+    const announcements = announcementService.getVisibleAnnouncements(teacherContext);
+
+    expect(announcements.map((item) => item.announcement.id).sort()).toEqual([
+      developmentAnnouncementIds.museumTrip,
+      developmentAnnouncementIds.sportsDay,
+    ].sort());
+  });
+
+  it('keeps announcement lists isolated by school', () => {
+    const { announcementService, identityService } = createServices();
+    const otherTeacherContext = contextFor(identityService, developmentIdentityIds.otherTeacher);
+
+    expect(announcementService.getVisibleAnnouncements(otherTeacherContext)).toEqual([]);
+  });
+
+  it('returns permission denied for protected announcement detail access', () => {
+    const { announcementService, identityService } = createServices();
+    const parentContext = contextFor(identityService, developmentIdentityIds.parentAmy);
+
+    const result = announcementService.getAnnouncementById(parentContext, developmentAnnouncementIds.sportsDay);
+
+    expect(result.ok).toBe(false);
+    expect(result.ok ? undefined : result.error.code).toBe(DomainErrorCode.PermissionDenied);
   });
 });

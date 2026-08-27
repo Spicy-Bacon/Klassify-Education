@@ -5,22 +5,26 @@ import type { AuthenticatedUserContext, DomainResult, EntityId, User } from '@ai
 import { AdminLayout } from './AdminLayout';
 import { PermissionDenied } from './components/PermissionDenied';
 import { adminRoutes } from './routes';
+import { AnnouncementDetailPage, AnnouncementsPage } from './pages/AnnouncementsPage';
 import { AdminHome } from './pages/AdminHome';
 import { ClassDetailPage, ClassesPage } from './pages/ClassesPage';
 import { ParentDetailPage, ParentsPage } from './pages/ParentsPage';
 import { StaffPage } from './pages/StaffPage';
 import { StudentDetailPage, StudentsPage } from './pages/StudentsPage';
 import { UsersPage } from './pages/UsersPage';
+import type { AnnouncementService } from '../announcements/AnnouncementService';
 import type { IdentityService } from '../identity/identityService';
 import type { IdentityOption } from '../identity/identityTypes';
 
 export function AdminApp({
   allowIdentitySwitching,
+  announcementService,
   identityOptions,
   identityService,
   initialUserId,
 }: {
   allowIdentitySwitching: boolean;
+  announcementService: AnnouncementService;
   identityOptions: IdentityOption[];
   identityService: IdentityService;
   initialUserId: EntityId;
@@ -113,6 +117,8 @@ export function AdminApp({
         <Route path="staff" element={guarded('staff', <StaffPage service={identityService} userContext={userContext} onAction={completeAction} />)} />
         <Route path="classes" element={guarded('classes', <ClassesPage service={identityService} userContext={userContext} onAction={completeAction} />)} />
         <Route path="classes/:classId" element={guarded('classes', <ClassDetailPage service={identityService} userContext={userContext} />)} />
+        <Route path="announcements" element={guarded('announcements', <AnnouncementsPage announcementService={announcementService} identityService={identityService} userContext={userContext} />)} />
+        <Route path="announcements/:announcementId" element={guarded('announcements', <AnnouncementDetailPage announcementService={announcementService} userContext={userContext} />)} />
       </Route>
       <Route path="*" element={<Navigate replace to="/admin" />} />
     </Routes>

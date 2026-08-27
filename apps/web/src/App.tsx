@@ -50,6 +50,7 @@ function AdminApplication() {
       allowIdentitySwitching={identityApplication.allowIdentitySwitching}
       identityOptions={identityApplication.identityOptions}
       identityService={identityApplication.identityService}
+      announcementService={identityApplication.announcementService}
       initialUserId={identityApplication.initialUserId}
     />
   );
