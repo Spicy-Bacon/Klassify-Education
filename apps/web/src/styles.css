@@ -1,4 +1,15 @@
 :root {
+  --color-background: #f8fafc;
+  --color-border: #d7dde5;
+  --color-border-subtle: #e2e8f0;
+  --color-muted: #64748b;
+  --color-surface: #ffffff;
+  --color-text: #1f2937;
+  --color-text-strong: #0f172a;
+  --color-primary: #0f766e;
+  --radius-control: 6px;
+  --radius-surface: 8px;
+  --space-page: 28px;
   color: #1f2937;
   background: #f8fafc;
   font-family:
@@ -214,6 +225,14 @@ button[type="submit"] {
 a {
   color: #0f766e;
   font-weight: 600;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid #99f6e4;
+  outline-offset: 2px;
 }
 
 .notice {

@@ -4,7 +4,8 @@ The foundation stage should stay aligned with Phase 1 product needs without impl
 
 ## Future MVP Areas
 
-- Identity and setup: schools, staff, parents, students, classes and parent-child relationships.
+- Identity and setup: schools, staff, parents, students, classes and parent-child relationships. Status: completed foundation.
+- Admin Portal Core: browser workspace shell, route architecture, role-aware navigation and school-structure administration. Status: completed core.
 - Connect: announcements, notifications, forms and replies, calendar and basic messaging.
 - Staff experience: attendance, announcements, messages, forms, calendar, AI drafting and photo upload.
 - Parent experience: notices, forms, calendar, messaging, leave request, multi-child support and private galleries.
