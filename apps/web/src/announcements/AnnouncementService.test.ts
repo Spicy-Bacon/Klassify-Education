@@ -276,3 +276,51 @@ describe('AnnouncementService administration views', () => {
     expect(result.ok ? undefined : result.error.code).toBe(DomainErrorCode.PermissionDenied);
   });
 });
+
+describe('AnnouncementService drafting workflow', () => {
+  it('saves and updates an administrator draft', () => {
+    const { announcementService, identityService } = createServices();
+    const adminContext = contextFor(identityService, developmentIdentityIds.admin);
+    const draft = announcementService.createDraft(adminContext, validClassAnnouncement(adminContext));
+
+    expect(draft.ok).toBe(true);
+    if (!draft.ok) {
+      throw new Error(draft.error.message);
+    }
+
+    const updated = announcementService.updateDraft(adminContext, draft.value.id, {
+      title: 'Updated Development Class Notice',
+      body: 'Updated fictional development message.',
+    });
+
+    expect(updated.ok).toBe(true);
+    expect(updated.ok ? updated.value.title : undefined).toBe('Updated Development Class Notice');
+  });
+
+  it('saves a teacher draft for an assigned class', () => {
+    const { announcementService, identityService } = createServices();
+    const teacherContext = contextFor(identityService, developmentIdentityIds.teacher3A);
+
+    const draft = announcementService.createDraft(teacherContext, validClassAnnouncement(teacherContext));
+
+    expect(draft.ok).toBe(true);
+    expect(draft.ok ? draft.value.audience[0]?.targetIds : []).toEqual([developmentIdentityIds.class3A]);
+  });
+
+  it('rejects an invalid publishable draft during recipient preview', () => {
+    const { announcementService, identityService } = createServices();
+    const adminContext = contextFor(identityService, developmentIdentityIds.admin);
+
+    const preview = announcementService.previewRecipients(adminContext, {
+      schoolId: developmentIdentityIds.demoSchool,
+      title: 'Incomplete Development Notice',
+      body: 'This draft is intentionally incomplete.',
+      authorUserId: adminContext.userId,
+      audience: [],
+      recipientGroups: [],
+    });
+
+    expect(preview.ok).toBe(false);
+    expect(preview.ok ? undefined : preview.error.code).toBe(DomainErrorCode.ValidationError);
+  });
+});

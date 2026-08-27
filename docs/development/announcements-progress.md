@@ -4,7 +4,7 @@ Branch: feature/announcements
 Phase: Phase 3 - Announcements
 
 ## Current Milestone
-Milestone 3 - Create & Edit Draft Announcement
+Milestone 4 - Preview, Publish & Schedule
 
 ## Completed
 - [x] Admin Portal Core verified in develop before starting Phase 3.
@@ -18,9 +18,13 @@ Milestone 3 - Create & Edit Draft Announcement
 - [x] Admin navigation includes permission-aware Communication / Announcements routes.
 - [x] Announcement list and detail routes added.
 - [x] Scoped list behavior covered by automated tests.
+- [x] Milestone 3 - Draft workflow
+- [x] Create announcement route added.
+- [x] Edit draft route added.
+- [x] Service-backed recipient preview added to the draft form.
+- [x] Draft create/edit tests added.
 
 ## Remaining
-- [ ] Milestone 3 - Draft workflow
 - [ ] Milestone 4 - Publish and schedule
 - [ ] Milestone 5 - Readership tracking
 - [ ] Milestone 6 - Integration and quality
@@ -34,8 +38,9 @@ Milestone 3 - Create & Edit Draft Announcement
 - Local CMake availability still needs to be verified for this branch.
 
 ## Next Exact Action
-Implement the draft creation/editing workflow with audience selection, recipient-group selection and service-backed recipient preview.
+Add preview, publish-now, schedule and cancel-schedule UI actions backed by existing announcement service state transitions.
 
 ## Commits
 - eef736d feat: add announcement domain foundation
-- Pending: feat: add announcement administration views
+- 546aa5f feat: add announcement administration views
+- Pending: feat: add announcement drafting workflow
