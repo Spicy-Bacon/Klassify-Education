@@ -23,6 +23,8 @@ const schoolAdminCapabilities = new Set<Permission>([
   Permission.ClassesView,
   Permission.ClassesManage,
   Permission.StudentsView,
+  Permission.AnnouncementsCreate,
+  Permission.AnnouncementsPublish,
 ]);
 
 const itAdminCapabilities = new Set<Permission>([
@@ -36,6 +38,8 @@ const teacherCapabilities = new Set<Permission>([
   Permission.ClassesView,
   Permission.StudentsView,
   Permission.AttendanceManage,
+  Permission.AnnouncementsCreate,
+  Permission.AnnouncementsPublish,
 ]);
 
 const parentCapabilities = new Set<Permission>([

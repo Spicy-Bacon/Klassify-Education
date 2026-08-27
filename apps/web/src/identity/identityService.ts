@@ -76,6 +76,10 @@ export class IdentityService {
     return this.accessPolicy.can(this.repository.getSnapshot(), userContext, permission, resourceContext);
   }
 
+  getSnapshot(): IdentitySnapshot {
+    return this.repository.getSnapshot();
+  }
+
   canManageUsers(userContext: AuthenticatedUserContext): boolean {
     return this.can(userContext, Permission.SchoolManageUsers, { schoolId: userContext.schoolId }).allowed;
   }
