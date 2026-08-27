@@ -32,6 +32,7 @@ import type {
   EnrollmentInput,
   GuardianLinkInput,
   GuardianSummary,
+  StudentDetailSummary,
   GuardianUserInput,
   StaffAssignmentInput,
   StaffSummary,
@@ -207,6 +208,25 @@ export class IdentityService {
     return { ok: true, value: toStudentSummary(snapshot, student) };
   }
 
+  getStudentDetailById(userContext: AuthenticatedUserContext, studentId: EntityId): DomainResult<StudentDetailSummary> {
+    const snapshot = this.repository.getSnapshot();
+    const studentResult = this.getStudentById(userContext, studentId);
+
+    if (!studentResult.ok) {
+      return studentResult;
+    }
+
+    const guardians = snapshot.guardianStudentLinks
+      .filter((link) => link.studentId === studentId && link.schoolId === userContext.schoolId && link.status === RelationshipStatus.Active)
+      .map((link) => {
+        const user = snapshot.users.find((candidate) => candidate.id === link.guardianUserId && candidate.schoolId === userContext.schoolId);
+        return user ? { user, relationshipType: link.relationshipType, isPrimary: link.isPrimary } : undefined;
+      })
+      .filter(isDefined);
+
+    return { ok: true, value: { ...studentResult.value, guardians } };
+  }
+
   getVisibleClasses(userContext: AuthenticatedUserContext): ClassSummary[] {
     const snapshot = this.repository.getSnapshot();
     return snapshot.classes
@@ -246,6 +266,25 @@ export class IdentityService {
       .filter((user) => user.schoolId === userContext.schoolId && user.role === Role.ParentGuardian)
       .filter((user) => this.accessPolicy.canViewSchoolAdministration(userContext) || user.id === userContext.userId)
       .map((user) => toGuardianSummary(snapshot, user));
+  }
+
+  getGuardianByUserId(userContext: AuthenticatedUserContext, guardianUserId: EntityId): DomainResult<GuardianSummary> {
+    const snapshot = this.repository.getSnapshot();
+    const guardian = snapshot.users.find((candidate) => candidate.id === guardianUserId && candidate.role === Role.ParentGuardian);
+
+    if (!guardian) {
+      return failure(DomainErrorCode.NotFound, 'Parent or guardian was not found.');
+    }
+
+    if (guardian.schoolId !== userContext.schoolId) {
+      return failure(DomainErrorCode.PermissionDenied, 'Parent or guardian access is not allowed.');
+    }
+
+    if (!this.accessPolicy.canViewSchoolAdministration(userContext) && guardian.id !== userContext.userId) {
+      return failure(DomainErrorCode.PermissionDenied, 'Parent or guardian access is not allowed.');
+    }
+
+    return { ok: true, value: toGuardianSummary(snapshot, guardian) };
   }
 
   getAssignableStudents(userContext: AuthenticatedUserContext): StudentSummary[] {
@@ -473,6 +512,7 @@ function toStudentSummary(snapshot: IdentitySnapshot, student: Student): Student
   return {
     student,
     yearGroup,
+    classId: schoolClass?.id,
     className: schoolClass?.name,
   };
 }
@@ -492,9 +532,17 @@ function toGuardianSummary(snapshot: IdentitySnapshot, user: User): GuardianSumm
     user,
     linkedChildren: snapshot.guardianStudentLinks
       .filter((link) => link.guardianUserId === user.id && link.status === RelationshipStatus.Active)
-      .map((link) => snapshot.students.find((student) => student.id === link.studentId))
-      .filter(isDefined)
-      .map((student) => toStudentSummary(snapshot, student)),
+      .map((link) => {
+        const student = snapshot.students.find((candidate) => candidate.id === link.studentId);
+        return student
+          ? {
+              ...toStudentSummary(snapshot, student),
+              relationshipType: link.relationshipType,
+              isPrimary: link.isPrimary,
+            }
+          : undefined;
+      })
+      .filter(isDefined),
   };
 }
 

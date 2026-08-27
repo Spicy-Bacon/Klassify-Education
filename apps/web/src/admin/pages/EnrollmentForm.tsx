@@ -22,20 +22,29 @@ export function EnrollmentForm({ service, userContext, onAction }: ActionPagePro
             classId: stringField(form, 'classId'),
           });
           onAction(result, 'Student enrolled into class.');
+          if (result.ok) {
+            event.currentTarget.reset();
+          }
         }}
       >
-        <select name="studentId">
-          {students.map((summary) => (
-            <option key={summary.student.id} value={summary.student.id}>
-              {summary.student.firstName} {summary.student.lastName}
-            </option>
-          ))}
-        </select>
-        <select name="classId">
-          {classes.map((summary) => (
-            <option key={summary.class.id} value={summary.class.id}>{summary.class.name}</option>
-          ))}
-        </select>
+        <label>
+          <span>Student</span>
+          <select name="studentId">
+            {students.map((summary) => (
+              <option key={summary.student.id} value={summary.student.id}>
+                {summary.student.firstName} {summary.student.lastName}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>Class</span>
+          <select name="classId">
+            {classes.map((summary) => (
+              <option key={summary.class.id} value={summary.class.id}>{summary.class.name}</option>
+            ))}
+          </select>
+        </label>
         <button type="submit">Enroll student</button>
       </form>
     </FormBox>

@@ -211,6 +211,11 @@ button[type="submit"] {
   background: #0f766e;
 }
 
+a {
+  color: #0f766e;
+  font-weight: 600;
+}
+
 .notice {
   border: 1px solid #99f6e4;
   border-radius: 8px;
@@ -340,6 +345,31 @@ tr:last-child td {
   border-bottom: 0;
 }
 
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+.filter-bar label,
+form label {
+  display: grid;
+  gap: 5px;
+}
+
+.filter-bar label {
+  min-width: 180px;
+}
+
+.filter-bar span,
+form label span {
+  color: #475569;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
 .form-box,
 .detail-box {
   margin-top: 16px;
@@ -373,6 +403,32 @@ form {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
+}
+
+.compact-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.detail-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.detail-list div {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.detail-list dt {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.detail-list dd {
+  margin: 0;
 }
 
 .state-box {

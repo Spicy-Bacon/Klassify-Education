@@ -4,7 +4,7 @@ Branch: feature/admin-portal
 Phase: Phase 2 - Admin Portal Core
 
 ## Current Milestone
-Milestone 4
+Milestone 5
 
 ## Completed
 - [x] Phase 1 Identity merged into develop before branch creation.
@@ -13,14 +13,14 @@ Milestone 4
 - [x] Milestone 1 - Application shell
 - [x] Milestone 2 - Role-aware navigation
 - [x] Milestone 3 - Overview dashboard
+- [x] Milestone 4 - Identity administration UX
 
 ## Remaining
-- [ ] Milestone 4 - Identity administration UX
 - [ ] Milestone 5 - Quality and validation
 
 ## Last Successful Validation
 - npm run lint --workspace apps/web
-- npm test --workspace apps/web (29 tests)
+- npm test --workspace apps/web (32 tests)
 - npm run build --workspace apps/web
 
 ## Known Issues
@@ -28,10 +28,11 @@ Milestone 4
 - Browser MCP manual verification was unavailable during Phase 1 validation.
 
 ## Next Exact Action
-Implement Milestone 4: improve identity administration list, detail, form, search and filter UX.
+Implement Milestone 5: documentation, accessibility review, final validation, CI and PR.
 
 ## Commits
 - ca90932 feat: add identity and school structure foundation
 - a51e5c4 feat: establish admin portal application shell
 - 882859d feat: add role-aware admin navigation
-- Pending: feat: build admin overview dashboard
+- bb7d88b feat: build admin overview dashboard
+- Pending: feat: improve school structure administration

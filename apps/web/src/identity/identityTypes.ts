@@ -100,7 +100,18 @@ export interface EnrollmentInput {
 export interface StudentSummary {
   student: Student;
   yearGroup?: YearGroup;
+  classId?: EntityId;
   className?: string;
+}
+
+export interface StudentGuardianSummary {
+  user: User;
+  relationshipType: GuardianRelationshipType;
+  isPrimary: boolean;
+}
+
+export interface StudentDetailSummary extends StudentSummary {
+  guardians: StudentGuardianSummary[];
 }
 
 export interface StaffSummary {
@@ -109,9 +120,14 @@ export interface StaffSummary {
   assignedClassNames: string[];
 }
 
+export interface GuardianChildSummary extends StudentSummary {
+  relationshipType: GuardianRelationshipType;
+  isPrimary: boolean;
+}
+
 export interface GuardianSummary {
   user: User;
-  linkedChildren: StudentSummary[];
+  linkedChildren: GuardianChildSummary[];
 }
 
 export interface ClassSummary {
