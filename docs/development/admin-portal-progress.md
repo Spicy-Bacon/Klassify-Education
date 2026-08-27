@@ -39,4 +39,4 @@ Open/merge feature/admin-portal PR into develop, then begin feature/announcement
 - 882859d feat: add role-aware admin navigation
 - bb7d88b feat: build admin overview dashboard
 - e235012 feat: improve school structure administration
-- Pending: docs: document admin portal core
+- 8d2586c docs: document admin portal core
