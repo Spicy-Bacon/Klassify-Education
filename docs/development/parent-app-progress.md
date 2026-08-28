@@ -50,4 +50,4 @@ Review and squash-merge feature/parent-app into develop, then begin feature/form
 ## Commits
 - a14b8c0 feat: add parent mobile domain foundation
 - d9f37cc feat: add ios parent experience
-- Pending: docs: document parent app architecture
+- 805c6a8 docs: document parent app architecture
