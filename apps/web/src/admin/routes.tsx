@@ -1,6 +1,6 @@
 import type { AdminSectionId } from '../identity/identityTypes';
 
-export type AdminNavigationGroup = 'primary' | 'people' | 'future';
+export type AdminNavigationGroup = 'primary' | 'people' | 'communication' | 'future';
 
 export interface AdminRouteDefinition {
   id: AdminSectionId;
@@ -17,10 +17,11 @@ export const adminRoutes: AdminRouteDefinition[] = [
   { id: 'staff', path: '/admin/staff', label: 'Staff', group: 'people', enabled: true },
   { id: 'users', path: '/admin/users', label: 'Users', group: 'people', enabled: true },
   { id: 'classes', path: '/admin/classes', label: 'Classes', group: 'primary', enabled: true },
+  { id: 'announcements', path: '/admin/announcements', label: 'Announcements', group: 'communication', enabled: true },
 ];
 
 export const futureAdminRoutes = [
-  { path: '/admin/announcements', label: 'Announcements' },
+  { path: '/admin/messaging', label: 'Messaging - later' },
   { path: '/admin/forms', label: 'Forms' },
   { path: '/admin/attendance', label: 'Attendance' },
   { path: '/admin/events', label: 'Events' },

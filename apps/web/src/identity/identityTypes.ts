@@ -10,6 +10,7 @@ import type {
   YearGroup,
 } from '@ai-school-platform/contracts';
 import { Role, StaffClassAssignmentType } from '@ai-school-platform/contracts';
+import type { AnnouncementService } from '../announcements/AnnouncementService';
 import type { IdentityService } from './identityService';
 
 export interface IdentityOption {
@@ -20,6 +21,7 @@ export interface IdentityOption {
 export interface ConfiguredIdentityApplication {
   mode: 'development';
   identityService: IdentityService;
+  announcementService: AnnouncementService;
   initialUserId: EntityId;
   identityOptions: IdentityOption[];
   allowIdentitySwitching: true;
@@ -154,4 +156,4 @@ export interface AdminOverview {
   canUseManagementActions: boolean;
 }
 
-export type AdminSectionId = 'overview' | 'users' | 'students' | 'parents' | 'staff' | 'classes';
+export type AdminSectionId = 'overview' | 'users' | 'students' | 'parents' | 'staff' | 'classes' | 'announcements';

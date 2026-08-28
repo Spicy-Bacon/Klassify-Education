@@ -76,6 +76,10 @@ export class IdentityService {
     return this.accessPolicy.can(this.repository.getSnapshot(), userContext, permission, resourceContext);
   }
 
+  getSnapshot(): IdentitySnapshot {
+    return this.repository.getSnapshot();
+  }
+
   canManageUsers(userContext: AuthenticatedUserContext): boolean {
     return this.can(userContext, Permission.SchoolManageUsers, { schoolId: userContext.schoolId }).allowed;
   }
@@ -102,11 +106,11 @@ export class IdentityService {
 
   getVisibleAdminSections(userContext: AuthenticatedUserContext): AdminSectionId[] {
     if (this.accessPolicy.canViewSchoolAdministration(userContext)) {
-      return ['overview', 'users', 'students', 'parents', 'staff', 'classes'];
+      return ['overview', 'users', 'students', 'parents', 'staff', 'classes', 'announcements'];
     }
 
     if (userContext.role === Role.Teacher) {
-      return ['overview', 'students', 'classes'];
+      return ['overview', 'students', 'classes', 'announcements'];
     }
 
     return [];

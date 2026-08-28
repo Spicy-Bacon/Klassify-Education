@@ -81,6 +81,26 @@ export enum Permission {
   MediaPublish = 'media.publish',
 }
 
+export enum AnnouncementStatus {
+  Draft = 'draft',
+  Scheduled = 'scheduled',
+  Published = 'published',
+  Archived = 'archived',
+}
+
+export enum AnnouncementAudienceType {
+  School = 'school',
+  YearGroup = 'year_group',
+  Class = 'class',
+  Users = 'users',
+}
+
+export enum AnnouncementRecipientGroup {
+  ParentGuardians = 'parent_guardians',
+  Students = 'students',
+  Staff = 'staff',
+}
+
 export enum DomainErrorCode {
   NotFound = 'NotFound',
   PermissionDenied = 'PermissionDenied',
@@ -208,4 +228,43 @@ export interface ResourceContext {
 export interface PermissionDecision {
   allowed: boolean;
   reason?: string;
+}
+
+export interface AnnouncementAudience {
+  type: AnnouncementAudienceType;
+  targetIds: EntityId[];
+}
+
+export interface AnnouncementAttachment {
+  id: EntityId;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  storageReference?: string;
+}
+
+export interface Announcement {
+  id: EntityId;
+  schoolId: EntityId;
+  title: string;
+  body: string;
+  status: AnnouncementStatus;
+  authorUserId: EntityId;
+  createdAt: ISODateTime;
+  updatedAt: ISODateTime;
+  publishedAt?: ISODateTime;
+  scheduledFor?: ISODateTime;
+  audience: AnnouncementAudience[];
+  recipientGroups: AnnouncementRecipientGroup[];
+  attachments?: AnnouncementAttachment[];
+}
+
+export interface AnnouncementRecipient {
+  id: EntityId;
+  announcementId: EntityId;
+  schoolId: EntityId;
+  userId: EntityId;
+  recipientGroup: AnnouncementRecipientGroup;
+  deliveredAt?: ISODateTime;
+  readAt?: ISODateTime;
 }

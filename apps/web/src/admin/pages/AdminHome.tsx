@@ -1,23 +1,31 @@
 import { Link } from 'react-router-dom';
+import type { AnnouncementService } from '../../announcements/AnnouncementService';
 import { PageHeader } from '../components/PageHeader';
 import { Table } from '../components/Table';
 import { Metric } from './Metric';
 import type { PageProps } from './pageTypes';
 
-export function AdminHome({ service, userContext }: PageProps) {
+export function AdminHome({ announcementService, service, userContext }: PageProps & { announcementService?: AnnouncementService }) {
   const overview = service.getAdminOverview(userContext);
+  const announcementItems = announcementService?.getVisibleAnnouncements(userContext) ?? [];
+  const publishedAnnouncements = announcementItems.filter((item) => item.announcement.status === 'published');
+  const scheduledAnnouncements = announcementItems.filter((item) => item.announcement.status === 'scheduled');
+  const averageReadRate = publishedAnnouncements.length === 0
+    ? 0
+    : Number((publishedAnnouncements.reduce((total, item) => total + item.readership.readRate, 0) / publishedAnnouncements.length).toFixed(1));
+  const canCreateAnnouncement = announcementService?.canCreate(userContext) ?? false;
 
   return (
     <section className="panel">
       <PageHeader eyebrow={overview.school?.name ?? 'School'} title="School Administration">
-        Identity and school structure overview.
+        Identity, school structure and current communication overview.
       </PageHeader>
       <div className="metric-grid">
         {overview.metrics.map((metric) => (
           <Metric key={metric.label} label={metric.label} value={metric.value} />
         ))}
       </div>
-      {overview.canUseManagementActions ? (
+      {(overview.canUseManagementActions || canCreateAnnouncement) ? (
         <section className="dashboard-section" aria-labelledby="quick-actions-title">
           <h3 id="quick-actions-title">Quick actions</h3>
           <div className="quick-actions">
@@ -29,6 +37,17 @@ export function AdminHome({ service, userContext }: PageProps) {
               </>
             ) : null}
             {service.canManageClasses(userContext) ? <Link to="/admin/classes">Create class</Link> : null}
+            {canCreateAnnouncement ? <Link to="/admin/announcements/new">Create announcement</Link> : null}
+          </div>
+        </section>
+      ) : null}
+      {announcementService ? (
+        <section className="dashboard-section" aria-labelledby="announcements-summary-title">
+          <h3 id="announcements-summary-title">Announcements</h3>
+          <div className="metric-grid">
+            <Metric label="Published" value={publishedAnnouncements.length} />
+            <Metric label="Scheduled" value={scheduledAnnouncements.length} />
+            <Metric label="Average read rate" value={`${averageReadRate}%`} />
           </div>
         </section>
       ) : null}
@@ -48,7 +67,7 @@ export function AdminHome({ service, userContext }: PageProps) {
       <section className="dashboard-section" aria-labelledby="coming-soon-title">
         <h3 id="coming-soon-title">Coming soon / Not yet available</h3>
         <div className="disabled-module-list" aria-label="Future workflow placeholders">
-          <span>Announcements</span>
+          <span>Messaging</span>
           <span>Forms</span>
           <span>Attendance</span>
           <span>Events</span>
