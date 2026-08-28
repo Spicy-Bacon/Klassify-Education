@@ -24,7 +24,7 @@ Phase 4B - Final hardening
 - [x] Android Gradle wrapper added
 
 ## Remaining
-- [ ] Push Phase 4B hardening commit
+- [x] Push Phase 4B hardening commit
 - [ ] Confirm PR #4 Web, C++, and Android CI are green
 
 ## Last Successful Validation
@@ -64,4 +64,4 @@ Commit and push Phase 4B hardening, inspect PR #4 CI, then squash-merge feature/
 - d9f37cc feat: add ios parent experience
 - 805c6a8 docs: document parent app architecture
 - c6cbf9b chore: finalize parent app progress
-- Pending: fix: harden parent mobile experience
+- 481e2c3 fix: harden parent mobile experience
