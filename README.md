@@ -4,7 +4,7 @@ AI School Platform is a modular school operations, communication, AI and media e
 
 Development status: **Pre-MVP / Foundation Stage**
 
-Current active product area: **Identity & School Structure**
+Current active product area: **Announcements**
 
 ## Product
 
@@ -64,7 +64,7 @@ Open pull requests into `develop`. Do not merge feature branches directly into `
 
 ## Current Scope
 
-This repository currently provides only the platform foundation. It does not implement production business logic, payments, grading, LMS functionality, admissions, livestreaming, facial recognition, advanced video generation or cross-school analytics.
+This repository currently provides the platform foundation plus the first development-backed announcements workflow. It does not implement production business logic, payments, grading, LMS functionality, admissions, livestreaming, facial recognition, advanced video generation or cross-school analytics.
 
 Backend provider, database, API framework, authentication, object storage, AI provider, deployment platform and service topology decisions are intentionally deferred.
 

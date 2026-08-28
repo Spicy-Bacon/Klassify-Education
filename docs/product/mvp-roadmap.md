@@ -1,12 +1,16 @@
 # MVP Roadmap Notes
 
-The foundation stage should stay aligned with Phase 1 product needs without implementing them prematurely.
+The foundation stage should stay aligned with Phase 1 product needs without implementing later modules prematurely.
+
+## Current Completed Foundations
+
+- Identity and School Structure: Complete.
+- Admin Portal Core: Complete.
+- Announcements: Complete in this Phase 3 branch, pending PR review and merge.
 
 ## Future MVP Areas
 
-- Identity and setup: schools, staff, parents, students, classes and parent-child relationships. Status: completed foundation.
-- Admin Portal Core: browser workspace shell, route architecture, role-aware navigation and school-structure administration. Status: completed core.
-- Connect: announcements, notifications, forms and replies, calendar and basic messaging.
+- Connect: notifications, forms and replies, calendar and basic messaging remain future work after announcements.
 - Staff experience: attendance, announcements, messages, forms, calendar, AI drafting and photo upload.
 - Parent experience: notices, forms, calendar, messaging, leave request, multi-child support and private galleries.
 - Student experience: notices, calendar, homework or tasks and resources.

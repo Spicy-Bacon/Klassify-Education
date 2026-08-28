@@ -108,7 +108,7 @@ export function AdminApp({
         )}
         path="/admin"
       >
-        <Route index element={guarded('overview', <AdminHome service={identityService} userContext={userContext} />)} />
+        <Route index element={guarded('overview', <AdminHome service={identityService} announcementService={announcementService} userContext={userContext} />)} />
         <Route path="users" element={guarded('users', <UsersPage service={identityService} userContext={userContext} />)} />
         <Route path="students" element={guarded('students', <StudentsPage service={identityService} userContext={userContext} onAction={completeAction} />)} />
         <Route path="students/:studentId" element={guarded('students', <StudentDetailPage service={identityService} userContext={userContext} />)} />

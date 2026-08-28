@@ -1,6 +1,6 @@
 # Admin Portal Architecture
 
-Phase 2 establishes the first extensible Klassify Education school administration workspace. It builds on the Phase 1 Identity & School Structure foundation and does not introduce announcements, forms, attendance, messaging, media, AI, production authentication or production persistence.
+Phase 2 established the first extensible Klassify Education school administration workspace. Phase 3 extends it with Announcements while still deferring forms, attendance, messaging, media, AI, production authentication and production persistence.
 
 ## Purpose
 
@@ -48,12 +48,15 @@ Current functional routes:
 /admin/staff
 /admin/classes
 /admin/classes/:classId
+/admin/announcements
+/admin/announcements/:announcementId
+/admin/announcements/new
+/admin/announcements/:announcementId/edit
 ```
 
 Future route extension points are listed but disabled for:
 
 ```text
-Announcements
 Forms
 Attendance
 Events
@@ -126,7 +129,6 @@ The following remain intentionally undecided or unimplemented:
 - Deployment platform.
 - Object storage.
 - AI model provider.
-- Announcements.
 - Forms.
 - Attendance.
 - Events.
