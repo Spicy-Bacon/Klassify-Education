@@ -1,6 +1,9 @@
 package com.example.aischoolplatform.dev.parent.service
 
 import com.example.aischoolplatform.dev.parent.data.DevelopmentParentRepository
+import com.example.aischoolplatform.dev.parent.model.ChildSummary
+import com.example.aischoolplatform.dev.parent.model.ParentAnnouncement
+import com.example.aischoolplatform.dev.parent.model.ParentHomeState
 import com.example.aischoolplatform.dev.parent.model.ParentRole
 import com.example.aischoolplatform.dev.parent.model.ParentSession
 import java.time.Instant
@@ -21,7 +24,7 @@ class ParentAppServiceTest {
         val service = service()
         val session = service.currentSession()!!
 
-        val result = service.linkedChildren(session) as ParentAppResult.Success
+        val result = service.linkedChildren(session) as ParentAppResult.Success<List<ChildSummary>>
 
         assertEquals(listOf("student-chloe", "student-ethan"), result.value.map { it.studentId })
     }
@@ -31,7 +34,7 @@ class ParentAppServiceTest {
         val service = service()
         val session = service.currentSession()!!
 
-        val result = service.homeState(session) as ParentAppResult.Success
+        val result = service.homeState(session) as ParentAppResult.Success<ParentHomeState>
 
         assertEquals(2, result.value.children.size)
         assertEquals("student-chloe", result.value.selectedChild?.studentId)
@@ -52,7 +55,7 @@ class ParentAppServiceTest {
         val service = service()
         val session = service.currentSession()!!
 
-        val result = service.inbox(session) as ParentAppResult.Success
+        val result = service.inbox(session) as ParentAppResult.Success<List<ParentAnnouncement>>
         val ids = result.value.map { it.id }
 
         assertTrue(ids.contains("ann-sports-day"))
@@ -66,7 +69,7 @@ class ParentAppServiceTest {
         val service = service()
         val session = service.currentSession()!!
 
-        val result = service.inbox(session) as ParentAppResult.Success
+        val result = service.inbox(session) as ParentAppResult.Success<List<ParentAnnouncement>>
 
         assertFalse(result.value.map { it.id }.contains("ann-cross-school"))
     }
@@ -76,13 +79,13 @@ class ParentAppServiceTest {
         val service = service()
         val session = service.currentSession()!!
 
-        val first = service.announcement(session, "ann-sports-day") as ParentAppResult.Success
+        val first = service.announcement(session, "ann-sports-day") as ParentAppResult.Success<ParentAnnouncement>
         assertNull(first.value.readAt)
 
-        val updated = service.markAnnouncementRead(session, "ann-sports-day") as ParentAppResult.Success
+        val updated = service.markAnnouncementRead(session, "ann-sports-day") as ParentAppResult.Success<ParentAnnouncement>
         assertEquals("2026-08-28T08:00:00Z", updated.value.readAt)
 
-        val reopened = service.announcement(session, "ann-sports-day") as ParentAppResult.Success
+        val reopened = service.announcement(session, "ann-sports-day") as ParentAppResult.Success<ParentAnnouncement>
         assertEquals("2026-08-28T08:00:00Z", reopened.value.readAt)
     }
 
@@ -96,5 +99,3 @@ class ParentAppServiceTest {
         assertTrue(result is ParentAppResult.Failure)
     }
 }
-
-
