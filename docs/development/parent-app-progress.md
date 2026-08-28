@@ -4,7 +4,7 @@ Branch: feature/parent-app
 Phase: Phase 4 - Parent App V1
 
 ## Current Milestone
-Complete
+Phase 4B - Final hardening
 
 ## Completed
 - [x] Milestone 1 - Mobile domain foundation
@@ -14,8 +14,18 @@ Complete
 - [x] Milestone 5 - Settings & UX
 - [x] Milestone 6 - Integration & validation
 
+## Final Hardening
+- [x] Android child context/detail navigation separated
+- [x] Android announcement navigation fixed
+- [x] Swift Traditional Chinese encoding fixed
+- [x] Android resource localization wired
+- [x] Language preference boundary added
+- [x] iOS localization aligned
+- [x] Android Gradle wrapper added
+
 ## Remaining
-None for Phase 4.
+- [ ] Push Phase 4B hardening commit
+- [ ] Confirm PR #4 Web, C++, and Android CI are green
 
 ## Last Successful Validation
 - `npm ci` passed using the temporary Node/npm toolchain.
@@ -23,31 +33,35 @@ None for Phase 4.
 - `npm test --workspace apps/web` passed: 79 tests.
 - `npm run build --workspace apps/web` passed.
 - `git diff --check` passed.
+- GitHub CI previously passed Web, C++, Android `testDebugUnitTest`, and Android `assembleDebug` for Phase 4 before this hardening commit.
 
 ## Known Issues
-- Android Gradle wrapper is not present in the repository.
-- Local Gradle is unavailable on PATH.
 - Local Android SDK environment variables are unavailable.
+- Local Android validation with JDK 23 reached Android dependency resolution but cannot continue because no Android SDK path is configured. JDK 25 is too new for the Android Gradle Plugin in this project. GitHub CI uses Java 17 and installs the Android SDK.
 - xcodebuild is unavailable in this Windows environment.
 - Local CMake is unavailable on PATH.
-- Vite emitted a Node engine warning because the temporary Node runtime is 22.11.0 and Vite prefers 22.12.0 or newer.
+- Vite emits a Node engine warning because the temporary Node runtime is 22.11.0 and Vite prefers 22.12.0 or newer.
+- Android language preference is persisted, but live app-locale switching remains deferred.
 
 ## Platform Validation
 
 ### Android
-- Source and unit tests added.
-- Local `gradle testDebugUnitTest` and `gradle assembleDebug` could not run because Gradle and Android SDK are unavailable locally.
-- GitHub CI has an Android job using a managed Gradle version and Android SDK setup.
+- Gradle wrapper 8.11.1 added under `apps/android`.
+- Local wrapper bootstrap `gradlew.bat -v` passed with Gradle 8.11.1.
+- Local `gradlew.bat testDebugUnitTest` with JDK 23 could not complete because no Android SDK path is configured.
+- GitHub CI must validate `./gradlew testDebugUnitTest` and `./gradlew assembleDebug` using Java 17 after the hardening push.
 
 ### iOS
-- SwiftUI source architecture added.
+- SwiftUI source architecture added and localization keys aligned.
 - Local Xcode build/test could not run because `xcodebuild` is unavailable and no generated Xcode project exists.
 - iOS CI remains deferred until a valid Xcode project exists.
 
 ## Next Exact Action
-Review and squash-merge feature/parent-app into develop, then begin feature/forms.
+Commit and push Phase 4B hardening, inspect PR #4 CI, then squash-merge feature/parent-app into develop if CI is green.
 
 ## Commits
 - a14b8c0 feat: add parent mobile domain foundation
 - d9f37cc feat: add ios parent experience
 - 805c6a8 docs: document parent app architecture
+- c6cbf9b chore: finalize parent app progress
+- Pending: fix: harden parent mobile experience

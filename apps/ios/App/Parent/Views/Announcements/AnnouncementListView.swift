@@ -8,7 +8,7 @@ struct AnnouncementListView: View {
         Group {
             if let announcements = try? service.inbox(session: session) {
                 if announcements.isEmpty {
-                    EmptyStateView(message: "No announcements yet.")
+                    EmptyStateView(message: String(localized: "empty_announcements"))
                 } else {
                     List(announcements) { announcement in
                         NavigationLink(value: announcement) {
@@ -23,7 +23,7 @@ struct AnnouncementListView: View {
                 ErrorStateView(message: "Announcements could not be loaded.")
             }
         }
-        .navigationTitle("Announcements")
+        .navigationTitle("screen_announcements")
     }
 }
 

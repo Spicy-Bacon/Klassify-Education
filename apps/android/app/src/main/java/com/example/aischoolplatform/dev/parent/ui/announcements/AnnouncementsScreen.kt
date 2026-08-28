@@ -13,10 +13,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.aischoolplatform.dev.R
 import com.example.aischoolplatform.dev.parent.model.ParentAnnouncement
 import com.example.aischoolplatform.dev.parent.model.ParentSession
 import com.example.aischoolplatform.dev.parent.service.ParentAppResult
@@ -35,11 +37,11 @@ fun AnnouncementsScreen(
         is ParentAppResult.Failure -> ErrorState(result.message, modifier = modifier)
         is ParentAppResult.Success -> {
             if (result.value.isEmpty()) {
-                EmptyState("No announcements yet.", modifier = modifier)
+                EmptyState(stringResource(R.string.empty_announcements), modifier = modifier)
             } else {
                 LazyColumn(modifier = modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     item {
-                        Text("Announcements", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.screen_announcements), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     }
                     items(result.value) { announcement ->
                         AnnouncementRow(announcement = announcement, onOpen = { onOpenAnnouncement(announcement.id) })

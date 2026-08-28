@@ -17,7 +17,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.example.aischoolplatform.dev.R
 import com.example.aischoolplatform.dev.parent.model.ParentSession
+import com.example.aischoolplatform.dev.parent.navigation.ParentNavigationState
+import com.example.aischoolplatform.dev.parent.navigation.ParentTab
 import com.example.aischoolplatform.dev.parent.service.ParentAppService
 import com.example.aischoolplatform.dev.parent.ui.announcements.AnnouncementDetailScreen
 import com.example.aischoolplatform.dev.parent.ui.announcements.AnnouncementsScreen
@@ -26,81 +30,77 @@ import com.example.aischoolplatform.dev.parent.ui.children.ChildrenScreen
 import com.example.aischoolplatform.dev.parent.ui.home.ParentHomeScreen
 import com.example.aischoolplatform.dev.parent.ui.settings.SettingsScreen
 
-private enum class ParentTab { Home, Announcements, Children, Settings }
-
 @Composable
 fun ParentRootView(service: ParentAppService, session: ParentSession) {
-    var selectedTab by remember { mutableStateOf(ParentTab.Home) }
-    var selectedChildId by remember { mutableStateOf<String?>(null) }
-    var selectedAnnouncementId by remember { mutableStateOf<String?>(null) }
+    var navigationState by remember { mutableStateOf(ParentNavigationState()) }
 
     Scaffold(
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
-                    selected = selectedTab == ParentTab.Home,
-                    onClick = { selectedTab = ParentTab.Home },
-                    icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
-                    label = { Text("Home") }
+                    selected = navigationState.selectedTab == ParentTab.Home,
+                    onClick = { navigationState = navigationState.selectTab(ParentTab.Home) },
+                    icon = { Icon(Icons.Filled.Home, contentDescription = stringResource(R.string.tab_home)) },
+                    label = { Text(stringResource(R.string.tab_home)) }
                 )
                 NavigationBarItem(
-                    selected = selectedTab == ParentTab.Announcements,
-                    onClick = { selectedTab = ParentTab.Announcements },
-                    icon = { Icon(Icons.Filled.Campaign, contentDescription = "Announcements") },
-                    label = { Text("Announcements") }
+                    selected = navigationState.selectedTab == ParentTab.Announcements,
+                    onClick = { navigationState = navigationState.selectTab(ParentTab.Announcements) },
+                    icon = { Icon(Icons.Filled.Campaign, contentDescription = stringResource(R.string.tab_announcements)) },
+                    label = { Text(stringResource(R.string.tab_announcements)) }
                 )
                 NavigationBarItem(
-                    selected = selectedTab == ParentTab.Children,
-                    onClick = { selectedTab = ParentTab.Children },
-                    icon = { Icon(Icons.Filled.ChildCare, contentDescription = "Children") },
-                    label = { Text("Children") }
+                    selected = navigationState.selectedTab == ParentTab.Children,
+                    onClick = { navigationState = navigationState.selectTab(ParentTab.Children) },
+                    icon = { Icon(Icons.Filled.ChildCare, contentDescription = stringResource(R.string.tab_children)) },
+                    label = { Text(stringResource(R.string.tab_children)) }
                 )
                 NavigationBarItem(
-                    selected = selectedTab == ParentTab.Settings,
-                    onClick = { selectedTab = ParentTab.Settings },
-                    icon = { Icon(Icons.Filled.Settings, contentDescription = "Settings") },
-                    label = { Text("Settings") }
+                    selected = navigationState.selectedTab == ParentTab.Settings,
+                    onClick = { navigationState = navigationState.selectTab(ParentTab.Settings) },
+                    icon = { Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.tab_settings)) },
+                    label = { Text(stringResource(R.string.tab_settings)) }
                 )
             }
         }
     ) { innerPadding ->
         val modifier = Modifier.padding(innerPadding)
         when {
-            selectedAnnouncementId != null -> AnnouncementDetailScreen(
+            navigationState.openedAnnouncementId != null -> AnnouncementDetailScreen(
                 service = service,
                 session = session,
-                announcementId = selectedAnnouncementId!!,
-                onBack = { selectedAnnouncementId = null }
+                announcementId = navigationState.openedAnnouncementId!!,
+                onBack = { navigationState = navigationState.closeAnnouncement() }
             )
-            selectedChildId != null && selectedTab == ParentTab.Children -> ChildDetailScreen(
+            navigationState.openedChildDetailId != null && navigationState.selectedTab == ParentTab.Children -> ChildDetailScreen(
                 service = service,
                 session = session,
-                childId = selectedChildId!!,
-                onBack = { selectedChildId = null },
+                childId = navigationState.openedChildDetailId!!,
+                onBack = { navigationState = navigationState.closeChildDetail() },
                 modifier = modifier
             )
-            selectedTab == ParentTab.Home -> ParentHomeScreen(
+            navigationState.selectedTab == ParentTab.Home -> ParentHomeScreen(
                 service = service,
                 session = session,
-                selectedChildId = selectedChildId,
-                onSelectChild = { selectedChildId = it },
-                onOpenAnnouncements = { selectedTab = ParentTab.Announcements },
-                onOpenAnnouncement = { selectedAnnouncementId = it },
+                selectedChildId = navigationState.selectedContextChildId,
+                onSelectChild = { navigationState = navigationState.selectContextChild(it) },
+                onOpenAnnouncements = { navigationState = navigationState.selectTab(ParentTab.Announcements) },
+                onOpenAnnouncement = { navigationState = navigationState.openAnnouncement(it) },
                 modifier = modifier
             )
-            selectedTab == ParentTab.Announcements -> AnnouncementsScreen(
+            navigationState.selectedTab == ParentTab.Announcements -> AnnouncementsScreen(
                 service = service,
                 session = session,
-                onOpenAnnouncement = { selectedAnnouncementId = it },
+                onOpenAnnouncement = { navigationState = navigationState.openAnnouncement(it) },
                 modifier = modifier
             )
-            selectedTab == ParentTab.Children -> ChildrenScreen(
+            navigationState.selectedTab == ParentTab.Children -> ChildrenScreen(
                 service = service,
                 session = session,
-                onOpenChild = { selectedChildId = it },
+                onOpenChild = { navigationState = navigationState.openChildDetail(it) },
                 modifier = modifier
             )
-            selectedTab == ParentTab.Settings -> SettingsScreen(
+            navigationState.selectedTab == ParentTab.Settings -> SettingsScreen(
                 service = service,
                 session = session,
                 modifier = modifier

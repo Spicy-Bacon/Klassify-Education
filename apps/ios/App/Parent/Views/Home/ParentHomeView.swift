@@ -21,8 +21,8 @@ struct ParentHomeView: View {
                     }
 
                     if !state.children.isEmpty {
-                        Section("Child context") {
-                            Picker("Child", selection: Binding(get: {
+                        Section("home_child_context") {
+                            Picker("home_child_context", selection: Binding(get: {
                                 selectedChildId ?? state.selectedChild?.studentId ?? state.children.first?.studentId
                             }, set: { selectedChildId = $0 })) {
                                 ForEach(state.children) { child in
@@ -32,13 +32,13 @@ struct ParentHomeView: View {
                         }
                     }
 
-                    Section("Unread announcements") {
+                    Section("home_unread_announcements") {
                         Text("\(state.unreadCount)")
                             .font(.title.bold())
                             .accessibilityLabel("\(state.unreadCount) unread announcements")
                     }
 
-                    Section("Latest announcements") {
+                    Section("home_latest_announcements") {
                         ForEach(state.announcements.prefix(3)) { announcement in
                             NavigationLink(value: announcement) {
                                 AnnouncementSummaryRow(announcement: announcement)
@@ -46,18 +46,18 @@ struct ParentHomeView: View {
                         }
                     }
 
-                    Section("Your children") {
+                    Section("home_my_children") {
                         ForEach(state.children) { child in
                             Text("\(child.displayName) - \(child.className)")
                         }
                     }
 
-                    Section("Action Required") {
-                        Text("Forms coming soon")
+                    Section("home_action_required") {
+                        Text("home_forms_coming_soon")
                             .foregroundStyle(.secondary)
                     }
                 }
-                .navigationTitle("Home")
+                .navigationTitle("home_title")
                 .navigationDestination(for: ParentAnnouncement.self) { announcement in
                     AnnouncementDetailView(service: service, session: session, announcementId: announcement.id)
                 }

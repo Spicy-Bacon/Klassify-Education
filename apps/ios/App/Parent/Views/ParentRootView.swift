@@ -39,23 +39,22 @@ struct ParentRootView: View {
             NavigationStack {
                 ParentHomeView(service: service, session: session, selectedChildId: $selectedChildId)
             }
-            .tabItem { Label("Home", systemImage: "house") }
+            .tabItem { Label("tab_home", systemImage: "house") }
 
             NavigationStack {
                 AnnouncementListView(service: service, session: session)
             }
-            .tabItem { Label("Announcements", systemImage: "megaphone") }
+            .tabItem { Label("tab_announcements", systemImage: "megaphone") }
 
             NavigationStack {
                 ChildrenView(service: service, session: session, selectedChildId: $selectedChildId)
             }
-            .tabItem { Label("Children", systemImage: "person.2") }
+            .tabItem { Label("tab_children", systemImage: "person.2") }
 
             NavigationStack {
                 SettingsView(service: service, session: session)
             }
-            .tabItem { Label("Settings", systemImage: "gearshape") }
+            .tabItem { Label("tab_settings", systemImage: "gearshape") }
         }
     }
 }
-

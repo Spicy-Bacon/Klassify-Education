@@ -72,8 +72,7 @@ enum LanguagePreference: String, CaseIterable, Identifiable {
         case .english:
             return "English"
         case .traditionalChinese:
-            return "ç¹é«”ä¸­æ–‡"
+            return "繁體中文"
         }
     }
 }
-

@@ -19,8 +19,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.aischoolplatform.dev.R
 import com.example.aischoolplatform.dev.parent.model.ChildSummary
 import com.example.aischoolplatform.dev.parent.model.ParentAnnouncement
 import com.example.aischoolplatform.dev.parent.model.ParentSession
@@ -45,7 +47,7 @@ fun ParentHomeScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                Text("Klassify Education", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Text("DEVELOPMENT ONLY parent session", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.error)
                 Text("Good morning, ${result.value.parent.displayName}", style = MaterialTheme.typography.titleMedium)
             }
@@ -57,16 +59,16 @@ fun ParentHomeScreen(
                 )
             }
             item {
-                SummaryCard(title = "Unread announcements", value = result.value.unreadCount.toString())
+                SummaryCard(title = stringResource(R.string.home_unread_announcements), value = result.value.unreadCount.toString())
             }
             item {
-                SectionHeader("Latest announcements", actionLabel = "View all", onAction = onOpenAnnouncements)
+                SectionHeader(stringResource(R.string.home_latest_announcements), actionLabel = stringResource(R.string.home_view_all), onAction = onOpenAnnouncements)
             }
             items(result.value.announcements.take(3)) { announcement ->
                 AnnouncementPreviewRow(announcement = announcement, onOpen = { onOpenAnnouncement(announcement.id) })
             }
             item {
-                SectionHeader("Your children")
+                SectionHeader(stringResource(R.string.home_my_children))
             }
             items(result.value.children) { child ->
                 Text("${child.displayName} - ${child.className}", style = MaterialTheme.typography.bodyLarge)
@@ -74,8 +76,8 @@ fun ParentHomeScreen(
             item {
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                     Column(Modifier.fillMaxWidth().padding(16.dp)) {
-                        Text("Action Required", style = MaterialTheme.typography.titleMedium)
-                        Text("Forms coming soon", style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.home_action_required), style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.home_forms_coming_soon), style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
@@ -86,7 +88,7 @@ fun ParentHomeScreen(
 @Composable
 private fun ChildSwitcher(children: List<ChildSummary>, selectedChild: ChildSummary?, onSelectChild: (String) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Child context", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.home_child_context), style = MaterialTheme.typography.titleMedium)
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(children) { child ->
                 AssistChip(

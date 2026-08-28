@@ -10,7 +10,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.aischoolplatform.dev.R
 
 @Composable
 fun EmptyState(message: String, modifier: Modifier = Modifier) {
@@ -30,11 +32,11 @@ fun ErrorState(message: String, onRetry: (() -> Unit)? = null, modifier: Modifie
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Something needs attention", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.error_title), style = MaterialTheme.typography.titleMedium)
         Text(message, style = MaterialTheme.typography.bodyMedium)
         if (onRetry != null) {
             Button(onClick = onRetry, modifier = Modifier.padding(top = 12.dp)) {
-                Text("Retry")
+                Text(stringResource(R.string.error_retry))
             }
         }
     }

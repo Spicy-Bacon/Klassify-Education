@@ -9,7 +9,7 @@ struct ChildrenView: View {
         Group {
             if let children = try? service.linkedChildren(session: session) {
                 if children.isEmpty {
-                    EmptyStateView(message: "No linked children were found.")
+                    EmptyStateView(message: String(localized: "empty_children"))
                 } else {
                     List(children) { child in
                         NavigationLink(value: child) {
@@ -30,6 +30,6 @@ struct ChildrenView: View {
                 ErrorStateView(message: "Children could not be loaded.")
             }
         }
-        .navigationTitle("Children")
+        .navigationTitle("screen_children")
     }
 }

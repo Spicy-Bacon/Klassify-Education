@@ -55,6 +55,7 @@ Android uses Kotlin, Jetpack Compose, and Material 3. The current package remain
 
 Key areas:
 
+- `gradlew`, `gradlew.bat`, and `gradle/wrapper`: Gradle 8.11.1 wrapper for reproducible Android builds.
 - `parent/model`: mobile-facing parent DTOs.
 - `parent/data`: repository interfaces and development repository.
 - `parent/service`: service boundary and development composition.
@@ -81,11 +82,11 @@ Both native apps expose the same V1 information architecture:
 - Children
 - Settings
 
-Android uses a bottom navigation bar. iOS uses a `TabView` with `NavigationStack` detail navigation.
+Android uses a bottom navigation bar backed by a small `ParentNavigationState` model. Selected child context, opened child detail, opened announcement detail, and selected tab are separate concepts so changing tabs does not leave stale detail screens active. iOS uses a `TabView` with `NavigationStack` detail navigation.
 
 ## Localization
 
-The initial preference options are English and Traditional Chinese. Full screen translation is deferred, but resource paths and UI layout choices are prepared for longer Traditional Chinese strings such as 最新消息, 我的子女, and 設定.
+The initial preference options are English and Traditional Chinese. Full screen translation is deferred, but resource paths and UI layout choices are prepared for longer Traditional Chinese strings such as æœ€æ–°æ¶ˆæ¯, æˆ‘çš„å­å¥³, and è¨­å®š.
 
 ## Privacy And Security
 

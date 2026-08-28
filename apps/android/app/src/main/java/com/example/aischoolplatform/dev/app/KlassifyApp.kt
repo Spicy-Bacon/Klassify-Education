@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.aischoolplatform.dev.parent.service.DevelopmentParentComposition
@@ -21,7 +22,8 @@ fun KlassifyApp(isDevelopmentBuild: Boolean) {
     MaterialTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             if (isDevelopmentBuild) {
-                val service = remember { DevelopmentParentComposition.createService() }
+                val context = LocalContext.current.applicationContext
+                val service = remember { DevelopmentParentComposition.createService(context) }
                 val session = remember { service.currentSession() }
                 if (session == null) {
                     AuthNotConfiguredScreen()

@@ -1,8 +1,10 @@
 package com.example.aischoolplatform.dev.parent.service
 
 import com.example.aischoolplatform.dev.parent.data.AnnouncementRepository
+import com.example.aischoolplatform.dev.parent.data.AppPreferenceRepository
 import com.example.aischoolplatform.dev.parent.data.ParentRepository
 import com.example.aischoolplatform.dev.parent.model.ChildSummary
+import com.example.aischoolplatform.dev.parent.model.LanguagePreference
 import com.example.aischoolplatform.dev.parent.model.ParentAnnouncement
 import com.example.aischoolplatform.dev.parent.model.ParentHomeState
 import com.example.aischoolplatform.dev.parent.model.ParentRole
@@ -17,6 +19,7 @@ sealed class ParentAppResult<out T> {
 class ParentAppService(
     private val parentRepository: ParentRepository,
     private val announcementRepository: AnnouncementRepository,
+    private val appPreferenceRepository: AppPreferenceRepository,
     private val now: () -> Instant = { Instant.now() }
 ) {
     fun currentSession(): ParentSession? = parentRepository.currentSession()
@@ -68,6 +71,13 @@ class ParentAppService(
         val updated = announcementRepository.markRead(session, announcementId, now().toString())
             ?: return ParentAppResult.Failure("Announcement was not found for this parent account.")
         return ParentAppResult.Success(updated)
+    }
+
+    fun languagePreference(): LanguagePreference = appPreferenceRepository.getLanguage()
+
+    fun setLanguagePreference(preference: LanguagePreference): LanguagePreference {
+        appPreferenceRepository.setLanguage(preference)
+        return appPreferenceRepository.getLanguage()
     }
 
     private fun isParentSession(session: ParentSession): Boolean =

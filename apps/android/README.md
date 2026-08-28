@@ -14,6 +14,27 @@ Current scope:
 - Children list and detail for linked children only.
 - Settings with profile, language preference options and development build indicator.
 - Repository/service boundaries for future API replacement.
+- Checked-in Gradle wrapper using Gradle 8.11.1.
+
+Development commands:
+
+```powershell
+.\gradlew.bat testDebugUnitTest
+.\gradlew.bat assembleDebug
+```
+
+On Linux/macOS:
+
+```bash
+./gradlew testDebugUnitTest
+./gradlew assembleDebug
+```
+
+Notes:
+
+- Primary navigation and common labels use Android string resources.
+- Language preference is stored through `AppPreferenceRepository`; live app-locale switching is deferred.
+- Child context selection, child detail navigation, and announcement detail navigation are separate state concepts.
 
 Deferred:
 

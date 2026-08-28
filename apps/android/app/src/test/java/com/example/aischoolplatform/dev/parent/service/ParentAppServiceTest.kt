@@ -1,7 +1,9 @@
 package com.example.aischoolplatform.dev.parent.service
 
 import com.example.aischoolplatform.dev.parent.data.DevelopmentParentRepository
+import com.example.aischoolplatform.dev.parent.data.InMemoryAppPreferenceRepository
 import com.example.aischoolplatform.dev.parent.model.ChildSummary
+import com.example.aischoolplatform.dev.parent.model.LanguagePreference
 import com.example.aischoolplatform.dev.parent.model.ParentAnnouncement
 import com.example.aischoolplatform.dev.parent.model.ParentHomeState
 import com.example.aischoolplatform.dev.parent.model.ParentRole
@@ -16,7 +18,7 @@ import org.junit.Test
 class ParentAppServiceTest {
     private fun service(): ParentAppService {
         val repository = DevelopmentParentRepository()
-        return ParentAppService(repository, repository) { Instant.parse("2026-08-28T08:00:00Z") }
+        return ParentAppService(repository, repository, InMemoryAppPreferenceRepository()) { Instant.parse("2026-08-28T08:00:00Z") }
     }
 
     @Test
@@ -97,5 +99,17 @@ class ParentAppServiceTest {
         val result = service.homeState(session)
 
         assertTrue(result is ParentAppResult.Failure)
+    }
+
+    @Test
+    fun languagePreferencePersistsThroughRepositoryBoundary() {
+        val preferences = InMemoryAppPreferenceRepository()
+        val repository = DevelopmentParentRepository()
+        val service = ParentAppService(repository, repository, preferences)
+
+        service.setLanguagePreference(LanguagePreference.TraditionalChinese)
+
+        assertEquals(LanguagePreference.TraditionalChinese, service.languagePreference())
+        assertEquals(LanguagePreference.TraditionalChinese, preferences.getLanguage())
     }
 }
