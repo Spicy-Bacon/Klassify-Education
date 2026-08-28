@@ -60,7 +60,7 @@ export interface AnnouncementListItem {
 }
 
 export interface AnnouncementDetail extends AnnouncementListItem {
-  recipients: AnnouncementRecipient[];
+  recipientPrivacy: 'aggregate_only';
 }
 
 export interface AnnouncementFilter {
@@ -73,3 +73,4 @@ export interface AnnouncementFilter {
 export interface ScheduleAnnouncementInput {
   scheduledFor: ISODateTime;
 }
+

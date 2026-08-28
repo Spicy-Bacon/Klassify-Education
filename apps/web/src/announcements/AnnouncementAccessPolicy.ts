@@ -1,10 +1,12 @@
 import {
   AnnouncementAudienceType,
+  AnnouncementStatus,
   DomainErrorCode,
   EnrollmentStatus,
   Permission,
   RelationshipStatus,
   Role,
+  type Announcement,
   type AnnouncementAudience,
   type AuthenticatedUserContext,
   type DomainResult,
@@ -29,6 +31,66 @@ export class AnnouncementAccessPolicy {
 
   canPublish(userContext: AuthenticatedUserContext, schoolId: EntityId): DomainResult<true> {
     return this.requireCapability(userContext, schoolId, Permission.AnnouncementsPublish);
+  }
+
+  canEditAnnouncement(
+    snapshot: IdentitySnapshot,
+    userContext: AuthenticatedUserContext,
+    announcement: Announcement,
+  ): DomainResult<true> {
+    const capability = this.requireCapability(userContext, announcement.schoolId, Permission.AnnouncementsCreate);
+    if (!capability.ok) {
+      return capability;
+    }
+
+    return this.canManageAnnouncement(snapshot, userContext, announcement);
+  }
+
+  canPublishAnnouncement(
+    snapshot: IdentitySnapshot,
+    userContext: AuthenticatedUserContext,
+    announcement: Announcement,
+  ): DomainResult<true> {
+    const capability = this.requireCapability(userContext, announcement.schoolId, Permission.AnnouncementsPublish);
+    if (!capability.ok) {
+      return capability;
+    }
+
+    if (![AnnouncementStatus.Draft, AnnouncementStatus.Scheduled].includes(announcement.status)) {
+      return failure(DomainErrorCode.ValidationError, 'Only draft or scheduled announcements can be published.');
+    }
+
+    return this.canManageAnnouncement(snapshot, userContext, announcement);
+  }
+
+  canScheduleAnnouncement(
+    snapshot: IdentitySnapshot,
+    userContext: AuthenticatedUserContext,
+    announcement: Announcement,
+  ): DomainResult<true> {
+    const capability = this.requireCapability(userContext, announcement.schoolId, Permission.AnnouncementsPublish);
+    if (!capability.ok) {
+      return capability;
+    }
+
+    if (![AnnouncementStatus.Draft, AnnouncementStatus.Scheduled].includes(announcement.status)) {
+      return failure(DomainErrorCode.ValidationError, 'Only draft or scheduled announcements can be scheduled.');
+    }
+
+    return this.canManageAnnouncement(snapshot, userContext, announcement);
+  }
+
+  canCancelSchedule(
+    snapshot: IdentitySnapshot,
+    userContext: AuthenticatedUserContext,
+    announcement: Announcement,
+  ): DomainResult<true> {
+    const capability = this.requireCapability(userContext, announcement.schoolId, Permission.AnnouncementsPublish);
+    if (!capability.ok) {
+      return capability;
+    }
+
+    return this.canManageAnnouncement(snapshot, userContext, announcement);
   }
 
   canTargetAudiences(
@@ -125,6 +187,30 @@ export class AnnouncementAccessPolicy {
 
     return { ok: true, value: true };
   }
+
+  private canManageAnnouncement(
+    snapshot: IdentitySnapshot,
+    userContext: AuthenticatedUserContext,
+    announcement: Announcement,
+  ): DomainResult<true> {
+    if (userContext.schoolId !== announcement.schoolId) {
+      return failure(DomainErrorCode.PermissionDenied, 'Cross-school announcement management is not allowed.');
+    }
+
+    if (schoolWideAnnouncementRoles.has(userContext.role)) {
+      return { ok: true, value: true };
+    }
+
+    if (userContext.role !== Role.Teacher) {
+      return failure(DomainErrorCode.PermissionDenied, 'This role cannot manage announcements.');
+    }
+
+    if (announcement.authorUserId !== userContext.userId) {
+      return failure(DomainErrorCode.PermissionDenied, 'Teachers may only manage announcements they authored.');
+    }
+
+    return this.canTargetAudiences(snapshot, userContext, announcement.schoolId, announcement.audience);
+  }
 }
 
 export function validateAudienceTargetsBelongToSchool(
@@ -140,6 +226,10 @@ export function validateAudienceTargetsBelongToSchool(
   }
 
   if (audience.type === AnnouncementAudienceType.YearGroup) {
+    if (audience.targetIds.length === 0) {
+      return failure(DomainErrorCode.ValidationError, 'Year group audience requires at least one target.');
+    }
+
     const valid = audience.targetIds.every((id) => snapshot.yearGroups.some((yearGroup) => yearGroup.id === id && yearGroup.schoolId === schoolId));
     return valid
       ? { ok: true, value: true }
@@ -147,10 +237,18 @@ export function validateAudienceTargetsBelongToSchool(
   }
 
   if (audience.type === AnnouncementAudienceType.Class) {
+    if (audience.targetIds.length === 0) {
+      return failure(DomainErrorCode.ValidationError, 'Class audience requires at least one target.');
+    }
+
     const valid = audience.targetIds.every((id) => snapshot.classes.some((schoolClass) => schoolClass.id === id && schoolClass.schoolId === schoolId));
     return valid
       ? { ok: true, value: true }
       : failure(DomainErrorCode.InvalidRelationship, 'Class audience targets must belong to the announcement school.');
+  }
+
+  if (audience.targetIds.length === 0) {
+    return failure(DomainErrorCode.ValidationError, 'Selected-user audience requires at least one target.');
   }
 
   const valid = audience.targetIds.every((id) => snapshot.users.some((user) => user.id === id && user.schoolId === schoolId));

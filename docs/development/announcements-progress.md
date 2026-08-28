@@ -23,6 +23,12 @@ Milestone 4 - Preview, Publish & Schedule
 - [x] Edit draft route added.
 - [x] Service-backed recipient preview added to the draft form.
 - [x] Draft create/edit tests added.
+- [x] Announcement security hardening completed.
+- [x] Announcement write ownership/scope policy added.
+- [x] Empty audience targets are rejected.
+- [x] Scheduled announcements must resolve to at least one recipient.
+- [x] Public readership summary access now requires user context.
+- [x] Normal announcement detail returns aggregate readership only.
 
 ## Remaining
 - [ ] Milestone 4 - Publish and schedule
@@ -32,6 +38,7 @@ Milestone 4 - Preview, Publish & Schedule
 ## Last Successful Validation
 - npm.cmd test --workspace apps/web
 - npm.cmd run lint --workspace apps/web
+- npm.cmd run build --workspace apps/web
 
 ## Known Issues
 - Local Node/npm are unavailable on PATH; validation uses the temporary Node/npm toolchain at C:\Users\yewha\AppData\Local\Temp\node-v22.11.0-win-x64.
@@ -43,4 +50,6 @@ Add preview, publish-now, schedule and cancel-schedule UI actions backed by exis
 ## Commits
 - eef736d feat: add announcement domain foundation
 - 546aa5f feat: add announcement administration views
-- Pending: feat: add announcement drafting workflow
+- 82f339d feat: add announcement drafting workflow
+- Pending: fix: harden announcement permissions and targeting
+

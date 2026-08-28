@@ -9,7 +9,6 @@ import {
   type AuthenticatedUserContext,
   type DomainResult,
   type EntityId,
-  type User,
 } from '@ai-school-platform/contracts';
 import type { IdentitySnapshot } from '../identity/identityRepository';
 import type { IdentityService } from '../identity/identityService';
@@ -40,9 +39,18 @@ export class AnnouncementService {
   }
 
   createDraft(userContext: AuthenticatedUserContext, input: AnnouncementInput): DomainResult<Announcement> {
-    const baseValidation = this.validateWritableDraft(userContext, input);
-    if (!baseValidation.ok) {
-      return baseValidation;
+    const createAccess = this.accessPolicy.canCreate(userContext, input.schoolId);
+    if (!createAccess.ok) {
+      return createAccess;
+    }
+
+    if (input.authorUserId !== userContext.userId) {
+      return failure(DomainErrorCode.PermissionDenied, 'Announcements must be authored by the current user.');
+    }
+
+    const validation = this.validateDraftShape(userContext, input);
+    if (!validation.ok) {
+      return validation;
     }
 
     const timestamp = new Date().toISOString();
@@ -85,9 +93,9 @@ export class AnnouncementService {
       updatedAt: new Date().toISOString(),
     };
 
-    const baseValidation = this.validateWritableDraft(userContext, candidate);
-    if (!baseValidation.ok) {
-      return baseValidation;
+    const validation = this.validateDraftShape(userContext, candidate);
+    if (!validation.ok) {
+      return validation;
     }
 
     return { ok: true, value: this.repository.saveAnnouncement(candidate) };
@@ -106,25 +114,30 @@ export class AnnouncementService {
   }
 
   publishAnnouncement(userContext: AuthenticatedUserContext, announcementId: EntityId): DomainResult<Announcement> {
-    const announcementResult = this.getAnnouncementForWrite(userContext, announcementId);
+    const announcementResult = this.findAnnouncement(announcementId);
     if (!announcementResult.ok) {
       return announcementResult;
     }
 
     const announcement = announcementResult.value;
+    const identitySnapshot = this.getIdentitySnapshot();
+    const access = this.accessPolicy.canPublishAnnouncement(identitySnapshot, userContext, announcement);
+    if (!access.ok) {
+      return access;
+    }
+
     const validation = this.validatePublishableAnnouncement(userContext, announcement);
     if (!validation.ok) {
       return validation;
     }
 
-    const identitySnapshot = this.getIdentitySnapshot();
-    const resolution = this.audienceResolver.resolve(identitySnapshot, announcement.schoolId, announcement.audience, announcement.recipientGroups);
-    if (resolution.uniqueRecipientCount === 0) {
-      return failure(DomainErrorCode.ValidationError, 'Announcement must resolve to at least one recipient before publishing.');
+    const resolution = this.resolveNonEmptyRecipients(announcement);
+    if (!resolution.ok) {
+      return resolution;
     }
 
     const timestamp = new Date().toISOString();
-    const recipients = resolution.recipients.map((recipient) => ({
+    const recipients = resolution.value.recipients.map((recipient) => ({
       id: this.repository.nextId('announcement_recipient'),
       announcementId: announcement.id,
       schoolId: announcement.schoolId,
@@ -150,12 +163,19 @@ export class AnnouncementService {
     announcementId: EntityId,
     input: ScheduleAnnouncementInput,
   ): DomainResult<Announcement> {
-    const announcementResult = this.getAnnouncementForWrite(userContext, announcementId);
+    const announcementResult = this.findAnnouncement(announcementId);
     if (!announcementResult.ok) {
       return announcementResult;
     }
 
-    const validation = this.validatePublishableAnnouncement(userContext, announcementResult.value);
+    const announcement = announcementResult.value;
+    const identitySnapshot = this.getIdentitySnapshot();
+    const access = this.accessPolicy.canScheduleAnnouncement(identitySnapshot, userContext, announcement);
+    if (!access.ok) {
+      return access;
+    }
+
+    const validation = this.validatePublishableAnnouncement(userContext, announcement);
     if (!validation.ok) {
       return validation;
     }
@@ -165,11 +185,16 @@ export class AnnouncementService {
       return failure(DomainErrorCode.ValidationError, 'Scheduled time must be a future ISO 8601 timestamp.');
     }
 
+    const resolution = this.resolveNonEmptyRecipients(announcement);
+    if (!resolution.ok) {
+      return resolution;
+    }
+
     const timestamp = new Date().toISOString();
     return {
       ok: true,
       value: this.repository.saveAnnouncement({
-        ...announcementResult.value,
+        ...announcement,
         status: AnnouncementStatus.Scheduled,
         scheduledFor: input.scheduledFor,
         updatedAt: timestamp,
@@ -178,19 +203,26 @@ export class AnnouncementService {
   }
 
   cancelSchedule(userContext: AuthenticatedUserContext, announcementId: EntityId): DomainResult<Announcement> {
-    const announcementResult = this.getAnnouncementForWrite(userContext, announcementId);
+    const announcementResult = this.findAnnouncement(announcementId);
     if (!announcementResult.ok) {
       return announcementResult;
     }
 
-    if (announcementResult.value.status !== AnnouncementStatus.Scheduled) {
+    const announcement = announcementResult.value;
+    const identitySnapshot = this.getIdentitySnapshot();
+    const access = this.accessPolicy.canCancelSchedule(identitySnapshot, userContext, announcement);
+    if (!access.ok) {
+      return access;
+    }
+
+    if (announcement.status !== AnnouncementStatus.Scheduled) {
       return failure(DomainErrorCode.ValidationError, 'Only scheduled announcements can return to draft.');
     }
 
     return {
       ok: true,
       value: this.repository.saveAnnouncement({
-        ...announcementResult.value,
+        ...announcement,
         status: AnnouncementStatus.Draft,
         scheduledFor: undefined,
         updatedAt: new Date().toISOString(),
@@ -222,29 +254,34 @@ export class AnnouncementService {
   }
 
   getAnnouncementById(userContext: AuthenticatedUserContext, announcementId: EntityId): DomainResult<AnnouncementDetail> {
-    const announcement = this.repository.getSnapshot().announcements.find((candidate) => candidate.id === announcementId);
-    if (!announcement) {
-      return failure(DomainErrorCode.NotFound, 'Announcement was not found.');
+    const announcementResult = this.findAnnouncement(announcementId);
+    if (!announcementResult.ok) {
+      return announcementResult;
     }
 
+    const announcement = announcementResult.value;
     const identitySnapshot = this.getIdentitySnapshot();
     const access = this.accessPolicy.canViewAnnouncement(identitySnapshot, userContext, announcement.schoolId, announcement.authorUserId, announcement.audience);
     if (!access.ok) {
       return access;
     }
 
-    const recipients = this.repository.getSnapshot().recipients.filter((recipient) => (
-      recipient.announcementId === announcement.id
-      && recipient.schoolId === userContext.schoolId
-    ));
-
     return {
       ok: true,
       value: {
         ...this.toListItem(identitySnapshot, announcement),
-        recipients,
+        recipientPrivacy: 'aggregate_only',
       },
     };
+  }
+
+  getAuthorizedReadershipSummary(userContext: AuthenticatedUserContext, announcementId: EntityId): DomainResult<AnnouncementReadershipSummary> {
+    const announcement = this.getAnnouncementById(userContext, announcementId);
+    if (!announcement.ok) {
+      return announcement;
+    }
+
+    return { ok: true, value: this.getReadershipSummaryForAnnouncement(announcementId) };
   }
 
   getInbox(userContext: AuthenticatedUserContext): AnnouncementListItem[] {
@@ -282,34 +319,18 @@ export class AnnouncementService {
     };
   }
 
-  getReadershipSummary(announcementId: EntityId): AnnouncementReadershipSummary {
-    return summarizeReadership(this.repository.getSnapshot().recipients.filter((recipient) => recipient.announcementId === announcementId));
-  }
-
   private getEditableAnnouncement(userContext: AuthenticatedUserContext, announcementId: EntityId): DomainResult<Announcement> {
-    const announcementResult = this.getAnnouncementForWrite(userContext, announcementId);
+    const announcementResult = this.findAnnouncement(announcementId);
     if (!announcementResult.ok) {
       return announcementResult;
     }
 
-    if (![AnnouncementStatus.Draft, AnnouncementStatus.Scheduled].includes(announcementResult.value.status)) {
+    const announcement = announcementResult.value;
+    if (![AnnouncementStatus.Draft, AnnouncementStatus.Scheduled].includes(announcement.status)) {
       return failure(DomainErrorCode.ValidationError, 'Published and archived announcements are read-only in this phase.');
     }
 
-    return announcementResult;
-  }
-
-  private getAnnouncementForWrite(userContext: AuthenticatedUserContext, announcementId: EntityId): DomainResult<Announcement> {
-    const announcement = this.repository.getSnapshot().announcements.find((candidate) => candidate.id === announcementId);
-    if (!announcement) {
-      return failure(DomainErrorCode.NotFound, 'Announcement was not found.');
-    }
-
-    if (announcement.schoolId !== userContext.schoolId) {
-      return failure(DomainErrorCode.PermissionDenied, 'Cross-school announcement access is not allowed.');
-    }
-
-    const access = this.accessPolicy.canPublish(userContext, announcement.schoolId);
+    const access = this.accessPolicy.canEditAnnouncement(this.getIdentitySnapshot(), userContext, announcement);
     if (!access.ok) {
       return access;
     }
@@ -317,14 +338,18 @@ export class AnnouncementService {
     return { ok: true, value: announcement };
   }
 
-  private validateWritableDraft(userContext: AuthenticatedUserContext, input: AnnouncementInput | Announcement): DomainResult<true> {
-    const createAccess = this.accessPolicy.canCreate(userContext, input.schoolId);
-    if (!createAccess.ok) {
-      return createAccess;
+  private findAnnouncement(announcementId: EntityId): DomainResult<Announcement> {
+    const announcement = this.repository.getSnapshot().announcements.find((candidate) => candidate.id === announcementId);
+    if (!announcement) {
+      return failure(DomainErrorCode.NotFound, 'Announcement was not found.');
     }
 
-    if (input.authorUserId !== userContext.userId) {
-      return failure(DomainErrorCode.PermissionDenied, 'Announcements must be authored by the current user.');
+    return { ok: true, value: announcement };
+  }
+
+  private validateDraftShape(userContext: AuthenticatedUserContext, input: AnnouncementInput | Announcement): DomainResult<true> {
+    if (input.schoolId !== userContext.schoolId) {
+      return failure(DomainErrorCode.PermissionDenied, 'Cross-school announcement access is not allowed.');
     }
 
     if (!input.title.trim() || !input.body.trim()) {
@@ -348,7 +373,7 @@ export class AnnouncementService {
   }
 
   private validatePublishableInput(userContext: AuthenticatedUserContext, input: AnnouncementInput): DomainResult<true> {
-    const draftValidation = this.validateWritableDraft(userContext, input);
+    const draftValidation = this.validateDraftShape(userContext, input);
     if (!draftValidation.ok) {
       return draftValidation;
     }
@@ -365,11 +390,6 @@ export class AnnouncementService {
   }
 
   private validatePublishableAnnouncement(userContext: AuthenticatedUserContext, announcement: Announcement): DomainResult<true> {
-    const publishAccess = this.accessPolicy.canPublish(userContext, announcement.schoolId);
-    if (!publishAccess.ok) {
-      return publishAccess;
-    }
-
     return this.validatePublishableInput(userContext, {
       schoolId: announcement.schoolId,
       title: announcement.title,
@@ -381,14 +401,33 @@ export class AnnouncementService {
     });
   }
 
+  private resolveNonEmptyRecipients(announcement: Announcement): DomainResult<RecipientResolution> {
+    const resolution = this.audienceResolver.resolve(
+      this.getIdentitySnapshot(),
+      announcement.schoolId,
+      announcement.audience,
+      announcement.recipientGroups,
+    );
+
+    if (resolution.uniqueRecipientCount === 0) {
+      return failure(DomainErrorCode.ValidationError, 'Announcement must resolve to at least one recipient before publishing or scheduling.');
+    }
+
+    return { ok: true, value: resolution };
+  }
+
   private toListItem(identitySnapshot: IdentitySnapshot, announcement: Announcement): AnnouncementListItem {
     const author = identitySnapshot.users.find((user) => user.id === announcement.authorUserId);
     return {
       announcement,
       author,
       audienceLabel: formatAudienceLabel(identitySnapshot, announcement),
-      readership: this.getReadershipSummary(announcement.id),
+      readership: this.getReadershipSummaryForAnnouncement(announcement.id),
     };
+  }
+
+  private getReadershipSummaryForAnnouncement(announcementId: EntityId): AnnouncementReadershipSummary {
+    return summarizeReadership(this.repository.getSnapshot().recipients.filter((recipient) => recipient.announcementId === announcementId));
   }
 
   private getIdentitySnapshot(): IdentitySnapshot {
