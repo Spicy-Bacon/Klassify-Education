@@ -29,6 +29,9 @@ Milestone 4 - Preview, Publish & Schedule
 - [x] Scheduled announcements must resolve to at least one recipient.
 - [x] Public readership summary access now requires user context.
 - [x] Normal announcement detail returns aggregate readership only.
+- [x] Milestone 4 - Publish and schedule
+- [x] Announcement detail actions added for preview, publish now, schedule and cancel schedule.
+- [x] Publish/schedule service transitions covered by tests.
 
 ## Remaining
 - [ ] Milestone 4 - Publish and schedule
@@ -45,11 +48,12 @@ Milestone 4 - Preview, Publish & Schedule
 - Local CMake availability still needs to be verified for this branch.
 
 ## Next Exact Action
-Add preview, publish-now, schedule and cancel-schedule UI actions backed by existing announcement service state transitions.
+Add the development-only inbox route and complete read-tracking UI/tests.
 
 ## Commits
 - eef736d feat: add announcement domain foundation
 - 546aa5f feat: add announcement administration views
 - 82f339d feat: add announcement drafting workflow
-- Pending: fix: harden announcement permissions and targeting
+- 9d3ddbf fix: harden announcement permissions and targeting
+- Pending: feat: add announcement publishing workflow
 

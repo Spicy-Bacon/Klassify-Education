@@ -119,7 +119,7 @@ export function AdminApp({
         <Route path="classes/:classId" element={guarded('classes', <ClassDetailPage service={identityService} userContext={userContext} />)} />
         <Route path="announcements" element={guarded('announcements', <AnnouncementsPage announcementService={announcementService} identityService={identityService} userContext={userContext} />)} />
         <Route path="announcements/new" element={guarded('announcements', <AnnouncementEditorPage announcementService={announcementService} identityService={identityService} userContext={userContext} onAction={completeAction} />)} />
-        <Route path="announcements/:announcementId" element={guarded('announcements', <AnnouncementDetailPage announcementService={announcementService} userContext={userContext} />)} />
+        <Route path="announcements/:announcementId" element={guarded('announcements', <AnnouncementDetailPage announcementService={announcementService} userContext={userContext} onAction={completeAction} />)} />
         <Route path="announcements/:announcementId/edit" element={guarded('announcements', <AnnouncementEditorPage announcementService={announcementService} identityService={identityService} userContext={userContext} onAction={completeAction} />)} />
       </Route>
       <Route path="*" element={<Navigate replace to="/admin" />} />

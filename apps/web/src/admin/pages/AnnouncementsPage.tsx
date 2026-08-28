@@ -4,6 +4,7 @@ import {
   AnnouncementAudienceType,
   AnnouncementRecipientGroup,
   AnnouncementStatus,
+  DomainErrorCode,
   Role,
   type AuthenticatedUserContext,
   type DomainResult,
@@ -103,12 +104,15 @@ export function AnnouncementsPage({
 
 export function AnnouncementDetailPage({
   announcementService,
+  onAction,
   userContext,
 }: {
   announcementService: AnnouncementService;
+  onAction: <T>(result: DomainResult<T>, successMessage: string) => void;
   userContext: AuthenticatedUserContext;
 }) {
   const { announcementId } = useParams();
+  const [scheduledFor, setScheduledFor] = useState('');
   const detail = announcementId ? announcementService.getAnnouncementById(userContext, announcementId) : undefined;
 
   if (!detail) {
@@ -120,6 +124,17 @@ export function AnnouncementDetailPage({
   }
 
   const item = detail.value;
+  const canManage = announcementService.canManageAnnouncement(userContext, item.announcement);
+  const canPublish = canManage && [AnnouncementStatus.Draft, AnnouncementStatus.Scheduled].includes(item.announcement.status);
+  const recipientPreview = announcementService.previewRecipients(userContext, {
+    schoolId: item.announcement.schoolId,
+    title: item.announcement.title,
+    body: item.announcement.body,
+    authorUserId: item.announcement.authorUserId,
+    audience: item.announcement.audience,
+    recipientGroups: item.announcement.recipientGroups,
+    attachments: item.announcement.attachments,
+  });
 
   return (
     <section className="panel">
@@ -152,8 +167,57 @@ export function AnnouncementDetailPage({
           <p>Read rate: {item.readership.readRate}%</p>
         </div>
       </div>
-      {[AnnouncementStatus.Draft, AnnouncementStatus.Scheduled].includes(item.announcement.status) ? (
+      {canManage && [AnnouncementStatus.Draft, AnnouncementStatus.Scheduled].includes(item.announcement.status) ? (
         <p><Link className="button-link" to={`/admin/announcements/${item.announcement.id}/edit`}>Edit draft</Link></p>
+      ) : null}
+
+      {canPublish ? (
+        <section className="form-box" aria-labelledby="announcement-publication-title">
+          <h3 id="announcement-publication-title">Preview and publication</h3>
+          <div className="preview-box">
+            <h4>{item.announcement.title}</h4>
+            <p><strong>To:</strong> {item.announcement.recipientGroups.map(recipientGroupLabel).join(', ')}</p>
+            <p><strong>Audience:</strong> {item.audienceLabel}</p>
+            <p>{item.announcement.body}</p>
+            <p><strong>Recipients:</strong> {recipientPreview.ok ? recipientPreview.value.uniqueRecipientCount : recipientPreview.error.message}</p>
+          </div>
+          <div className="form-actions">
+            <button
+              onClick={() => onAction(announcementService.publishAnnouncement(userContext, item.announcement.id), 'Announcement published.')}
+              type="button"
+            >
+              Publish Now
+            </button>
+            <label>
+              <span>Schedule time</span>
+              <input
+                min={new Date().toISOString().slice(0, 16)}
+                onChange={(event) => setScheduledFor(event.target.value)}
+                type="datetime-local"
+                value={scheduledFor}
+              />
+            </label>
+            <button
+              onClick={() => {
+                const result = scheduledFor
+                  ? announcementService.scheduleAnnouncement(userContext, item.announcement.id, { scheduledFor: new Date(scheduledFor).toISOString() })
+                  : { ok: false, error: { code: DomainErrorCode.ValidationError, message: 'Choose a schedule time first.' } } as const;
+                onAction(result, 'Announcement scheduled.');
+              }}
+              type="button"
+            >
+              Schedule
+            </button>
+            {item.announcement.status === AnnouncementStatus.Scheduled ? (
+              <button
+                onClick={() => onAction(announcementService.cancelSchedule(userContext, item.announcement.id), 'Schedule cancelled.')}
+                type="button"
+              >
+                Cancel Schedule
+              </button>
+            ) : null}
+          </div>
+        </section>
       ) : null}
     </section>
   );
@@ -424,3 +488,5 @@ function buildAudienceOptions(
     disabled: userContext.role === Role.Teacher,
   }));
 }
+
+

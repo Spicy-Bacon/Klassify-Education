@@ -38,6 +38,10 @@ export class AnnouncementService {
     return this.accessPolicy.canCreate(userContext, userContext.schoolId).ok;
   }
 
+  canManageAnnouncement(userContext: AuthenticatedUserContext, announcement: Announcement): boolean {
+    return this.accessPolicy.canEditAnnouncement(this.getIdentitySnapshot(), userContext, announcement).ok;
+  }
+
   createDraft(userContext: AuthenticatedUserContext, input: AnnouncementInput): DomainResult<Announcement> {
     const createAccess = this.accessPolicy.canCreate(userContext, input.schoolId);
     if (!createAccess.ok) {

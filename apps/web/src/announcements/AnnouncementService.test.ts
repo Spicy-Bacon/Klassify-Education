@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   AnnouncementAudienceType,
   AnnouncementRecipientGroup,
+  AnnouncementStatus,
   DomainErrorCode,
   type AuthenticatedUserContext,
 } from '@ai-school-platform/contracts';
@@ -564,3 +565,133 @@ describe('AnnouncementService hardening', () => {
 });
 
 
+
+describe('AnnouncementService publishing workflow', () => {
+  it('publishes a valid administrator announcement and creates recipient records', () => {
+    const { announcementService, identityService } = createServices();
+    const adminContext = contextFor(identityService, developmentIdentityIds.admin);
+    const draft = announcementService.createDraft(adminContext, validClassAnnouncement(adminContext));
+
+    expect(draft.ok).toBe(true);
+    if (!draft.ok) {
+      throw new Error(draft.error.message);
+    }
+
+    const published = announcementService.publishAnnouncement(adminContext, draft.value.id);
+
+    expect(published.ok).toBe(true);
+    expect(published.ok ? published.value.status : undefined).toBe(AnnouncementStatus.Published);
+    expect(readershipValue(announcementService.getAuthorizedReadershipSummary(adminContext, draft.value.id)).delivered).toBe(2);
+  });
+
+  it('allows a teacher to publish their own assigned-class announcement', () => {
+    const { announcementService, identityService } = createServices();
+    const teacherContext = contextFor(identityService, developmentIdentityIds.teacher3A);
+    const draft = announcementService.createDraft(teacherContext, validClassAnnouncement(teacherContext));
+
+    expect(draft.ok).toBe(true);
+    if (!draft.ok) {
+      throw new Error(draft.error.message);
+    }
+
+    const published = announcementService.publishAnnouncement(teacherContext, draft.value.id);
+
+    expect(published.ok).toBe(true);
+    expect(published.ok ? published.value.status : undefined).toBe(AnnouncementStatus.Published);
+  });
+
+  it('rejects publication when recipient resolution is empty', () => {
+    const { announcementService, identityService } = createServices();
+    const adminContext = contextFor(identityService, developmentIdentityIds.admin);
+    const draft = announcementService.createDraft(adminContext, {
+      schoolId: developmentIdentityIds.demoSchool,
+      title: 'No Recipient Publish Notice',
+      body: 'This fictional selected-user target cannot resolve to student recipients.',
+      authorUserId: adminContext.userId,
+      audience: [{ type: AnnouncementAudienceType.Users, targetIds: [developmentIdentityIds.parentAmy] }],
+      recipientGroups: [AnnouncementRecipientGroup.Students],
+    });
+
+    expect(draft.ok).toBe(true);
+    if (!draft.ok) {
+      throw new Error(draft.error.message);
+    }
+
+    const published = announcementService.publishAnnouncement(adminContext, draft.value.id);
+
+    expect(published.ok).toBe(false);
+    expect(published.ok ? undefined : published.error.code).toBe(DomainErrorCode.ValidationError);
+  });
+
+  it('schedules a valid future announcement', () => {
+    const { announcementService, identityService } = createServices();
+    const adminContext = contextFor(identityService, developmentIdentityIds.admin);
+    const draft = announcementService.createDraft(adminContext, validClassAnnouncement(adminContext));
+
+    expect(draft.ok).toBe(true);
+    if (!draft.ok) {
+      throw new Error(draft.error.message);
+    }
+
+    const scheduled = announcementService.scheduleAnnouncement(adminContext, draft.value.id, { scheduledFor: '2099-09-01T09:00:00.000Z' });
+
+    expect(scheduled.ok).toBe(true);
+    expect(scheduled.ok ? scheduled.value.status : undefined).toBe(AnnouncementStatus.Scheduled);
+    expect(scheduled.ok ? scheduled.value.scheduledFor : undefined).toBe('2099-09-01T09:00:00.000Z');
+  });
+
+  it('rejects a past schedule timestamp', () => {
+    const { announcementService, identityService } = createServices();
+    const adminContext = contextFor(identityService, developmentIdentityIds.admin);
+    const draft = announcementService.createDraft(adminContext, validClassAnnouncement(adminContext));
+
+    expect(draft.ok).toBe(true);
+    if (!draft.ok) {
+      throw new Error(draft.error.message);
+    }
+
+    const scheduled = announcementService.scheduleAnnouncement(adminContext, draft.value.id, { scheduledFor: '2020-01-01T09:00:00.000Z' });
+
+    expect(scheduled.ok).toBe(false);
+    expect(scheduled.ok ? undefined : scheduled.error.code).toBe(DomainErrorCode.ValidationError);
+  });
+
+  it('returns an authorised scheduled announcement to draft', () => {
+    const { announcementService, identityService } = createServices();
+    const adminContext = contextFor(identityService, developmentIdentityIds.admin);
+    const draft = announcementService.createDraft(adminContext, validClassAnnouncement(adminContext));
+
+    expect(draft.ok).toBe(true);
+    if (!draft.ok) {
+      throw new Error(draft.error.message);
+    }
+
+    const scheduled = announcementService.scheduleAnnouncement(adminContext, draft.value.id, { scheduledFor: '2099-09-01T09:00:00.000Z' });
+    expect(scheduled.ok).toBe(true);
+
+    const cancelled = announcementService.cancelSchedule(adminContext, draft.value.id);
+
+    expect(cancelled.ok).toBe(true);
+    expect(cancelled.ok ? cancelled.value.status : undefined).toBe(AnnouncementStatus.Draft);
+    expect(cancelled.ok ? cancelled.value.scheduledFor : 'unexpected').toBeUndefined();
+  });
+
+  it('keeps published announcement content read-only', () => {
+    const { announcementService, identityService } = createServices();
+    const adminContext = contextFor(identityService, developmentIdentityIds.admin);
+    const draft = announcementService.createDraft(adminContext, validClassAnnouncement(adminContext));
+
+    expect(draft.ok).toBe(true);
+    if (!draft.ok) {
+      throw new Error(draft.error.message);
+    }
+
+    const published = announcementService.publishAnnouncement(adminContext, draft.value.id);
+    expect(published.ok).toBe(true);
+
+    const update = announcementService.updateDraft(adminContext, draft.value.id, { title: 'Blocked published edit' });
+
+    expect(update.ok).toBe(false);
+    expect(update.ok ? undefined : update.error.code).toBe(DomainErrorCode.ValidationError);
+  });
+});
