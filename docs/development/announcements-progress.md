@@ -32,6 +32,11 @@ Milestone 4 - Preview, Publish & Schedule
 - [x] Milestone 4 - Publish and schedule
 - [x] Announcement detail actions added for preview, publish now, schedule and cancel schedule.
 - [x] Publish/schedule service transitions covered by tests.
+- [x] Milestone 5 - Readership tracking
+- [x] Development-only recipient inbox added at /dev/inbox.
+- [x] Inbox queries use scoped recipient service methods.
+- [x] Opening an inbox announcement persists readAt through the repository/service layer.
+- [x] Readership totals and recipient-group breakdowns are tested.
 
 ## Remaining
 - [ ] Milestone 4 - Publish and schedule
@@ -48,12 +53,13 @@ Milestone 4 - Preview, Publish & Schedule
 - Local CMake availability still needs to be verified for this branch.
 
 ## Next Exact Action
-Add the development-only inbox route and complete read-tracking UI/tests.
+Complete dashboard integration, announcement architecture documentation, roadmap updates and final validation.
 
 ## Commits
 - eef736d feat: add announcement domain foundation
 - 546aa5f feat: add announcement administration views
 - 82f339d feat: add announcement drafting workflow
 - 9d3ddbf fix: harden announcement permissions and targeting
-- Pending: feat: add announcement publishing workflow
+- d2dae67 feat: add announcement publishing workflow
+- Pending: feat: add announcement readership tracking
 

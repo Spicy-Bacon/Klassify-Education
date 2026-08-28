@@ -19,6 +19,7 @@ import type {
   AnnouncementDetail,
   AnnouncementFilter,
   AnnouncementInput,
+  AnnouncementInboxItem,
   AnnouncementListItem,
   AnnouncementReadershipSummary,
   AnnouncementUpdateInput,
@@ -288,18 +289,21 @@ export class AnnouncementService {
     return { ok: true, value: this.getReadershipSummaryForAnnouncement(announcementId) };
   }
 
-  getInbox(userContext: AuthenticatedUserContext): AnnouncementListItem[] {
+  getInbox(userContext: AuthenticatedUserContext): AnnouncementInboxItem[] {
     const identitySnapshot = this.getIdentitySnapshot();
     const snapshot = this.repository.getSnapshot();
-    const announcementIds = new Set(snapshot.recipients
+    const recipientsByAnnouncement = new Map(snapshot.recipients
       .filter((recipient) => recipient.schoolId === userContext.schoolId && recipient.userId === userContext.userId)
-      .map((recipient) => recipient.announcementId));
+      .map((recipient) => [recipient.announcementId, recipient]));
 
     return snapshot.announcements
       .filter((announcement) => announcement.status === AnnouncementStatus.Published)
       .filter((announcement) => announcement.schoolId === userContext.schoolId)
-      .filter((announcement) => announcementIds.has(announcement.id))
-      .map((announcement) => this.toListItem(identitySnapshot, announcement));
+      .map((announcement) => {
+        const currentRecipient = recipientsByAnnouncement.get(announcement.id);
+        return currentRecipient ? { ...this.toListItem(identitySnapshot, announcement), currentRecipient } : undefined;
+      })
+      .filter(isDefined);
   }
 
   markRead(userContext: AuthenticatedUserContext, announcementId: EntityId): DomainResult<AnnouncementRecipient> {
@@ -511,4 +515,8 @@ function emptyGroupSummary() {
 
 function failure<T = never>(code: DomainErrorCode, message: string): DomainResult<T> {
   return { ok: false, error: { code, message } };
+}
+
+function isDefined<T>(value: T | undefined): value is T {
+  return value !== undefined;
 }

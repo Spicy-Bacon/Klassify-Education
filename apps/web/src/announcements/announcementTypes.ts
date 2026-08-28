@@ -63,6 +63,10 @@ export interface AnnouncementDetail extends AnnouncementListItem {
   recipientPrivacy: 'aggregate_only';
 }
 
+export interface AnnouncementInboxItem extends AnnouncementListItem {
+  currentRecipient: AnnouncementRecipient;
+}
+
 export interface AnnouncementFilter {
   status?: AnnouncementStatus;
   audienceType?: AnnouncementAudience['type'];

@@ -531,3 +531,90 @@ form {
     padding: 18px;
   }
 }
+
+textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 10px;
+  font: inherit;
+  resize: vertical;
+}
+
+.stacked-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.stacked-form .form-box {
+  display: grid;
+  gap: 12px;
+}
+
+.checkbox-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+  margin-top: 12px;
+}
+
+.notice-error {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.preview-box {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 14px;
+}
+
+.preview-box h4 {
+  margin: 0 0 8px;
+}
+
+.dev-inbox .admin-topbar {
+  align-items: center;
+}
+
+.inbox-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) minmax(220px, 320px) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.inbox-list {
+  display: grid;
+  gap: 8px;
+}
+
+.inbox-list button {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  min-height: 72px;
+  text-align: left;
+}
+
+.inbox-list span {
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.inbox-message {
+  align-self: start;
+}
+
+@media (max-width: 960px) {
+  .inbox-layout {
+    grid-template-columns: 1fr;
+  }
+}

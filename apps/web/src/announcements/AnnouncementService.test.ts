@@ -695,3 +695,126 @@ describe('AnnouncementService publishing workflow', () => {
     expect(update.ok ? undefined : update.error.code).toBe(DomainErrorCode.ValidationError);
   });
 });
+
+describe('AnnouncementService readership tracking', () => {
+  it('returns targeted published announcements for a recipient', () => {
+    const { announcementService, identityService } = createServices();
+    const parentContext = contextFor(identityService, developmentIdentityIds.parentAmy);
+
+    expect(announcementService.getInbox(parentContext).map((item) => item.announcement.id)).toContain(developmentAnnouncementIds.sportsDay);
+  });
+
+  it('does not return class announcements to unrelated parents', () => {
+    const { announcementService, identityService } = createServices();
+    const adminContext = contextFor(identityService, developmentIdentityIds.admin);
+    const benContext = contextFor(identityService, developmentIdentityIds.parentBen);
+    const draft = announcementService.createDraft(adminContext, {
+      schoolId: developmentIdentityIds.demoSchool,
+      title: 'Class 1B Family Notice',
+      body: 'Fictional development notice for Class 1B families.',
+      authorUserId: adminContext.userId,
+      audience: [{ type: AnnouncementAudienceType.Class, targetIds: [developmentIdentityIds.class1B] }],
+      recipientGroups: [AnnouncementRecipientGroup.ParentGuardians],
+    });
+
+    expect(draft.ok).toBe(true);
+    if (!draft.ok) {
+      throw new Error(draft.error.message);
+    }
+    const published = announcementService.publishAnnouncement(adminContext, draft.value.id);
+    expect(published.ok).toBe(true);
+
+    expect(announcementService.getInbox(benContext).map((item) => item.announcement.id)).not.toContain(draft.value.id);
+  });
+
+  it('does not return parent-only announcements to unrelated students', () => {
+    const { announcementService, identityService } = createServices();
+    const adminContext = contextFor(identityService, developmentIdentityIds.admin);
+    const studentContext = contextFor(identityService, developmentIdentityIds.studentChloeUser);
+    const draft = announcementService.createDraft(adminContext, {
+      schoolId: developmentIdentityIds.demoSchool,
+      title: 'Parent Only Notice',
+      body: 'Fictional parent-only development notice.',
+      authorUserId: adminContext.userId,
+      audience: [{ type: AnnouncementAudienceType.Class, targetIds: [developmentIdentityIds.class1B] }],
+      recipientGroups: [AnnouncementRecipientGroup.ParentGuardians],
+    });
+
+    expect(draft.ok).toBe(true);
+    if (!draft.ok) {
+      throw new Error(draft.error.message);
+    }
+    const published = announcementService.publishAnnouncement(adminContext, draft.value.id);
+    expect(published.ok).toBe(true);
+
+    expect(announcementService.getInbox(studentContext).map((item) => item.announcement.id)).not.toContain(draft.value.id);
+  });
+
+  it('does not return Demo School announcements to cross-school users', () => {
+    const { announcementService, identityService } = createServices();
+    const otherParentContext = contextFor(identityService, developmentIdentityIds.otherParent);
+
+    expect(announcementService.getInbox(otherParentContext)).toEqual([]);
+  });
+
+  it('excludes draft and scheduled announcements from the inbox', () => {
+    const { announcementService, identityService } = createServices();
+    const parentContext = contextFor(identityService, developmentIdentityIds.parentAmy);
+
+    const inboxIds = announcementService.getInbox(parentContext).map((item) => item.announcement.id);
+
+    expect(inboxIds).not.toContain(developmentAnnouncementIds.museumTrip);
+    expect(inboxIds).not.toContain(developmentAnnouncementIds.holidayNotice);
+  });
+
+  it('marks an announcement read and persists readAt idempotently', () => {
+    const { announcementService, identityService } = createServices();
+    const parentContext = contextFor(identityService, developmentIdentityIds.parentBen);
+
+    const before = announcementService.getInbox(parentContext).find((item) => item.announcement.id === developmentAnnouncementIds.sportsDay);
+    expect(before?.currentRecipient.readAt).toBeUndefined();
+
+    const firstRead = announcementService.markRead(parentContext, developmentAnnouncementIds.sportsDay);
+    expect(firstRead.ok).toBe(true);
+    if (!firstRead.ok) {
+      throw new Error(firstRead.error.message);
+    }
+
+    const after = announcementService.getInbox(parentContext).find((item) => item.announcement.id === developmentAnnouncementIds.sportsDay);
+    expect(after?.currentRecipient.readAt).toBe(firstRead.value.readAt);
+
+    const secondRead = announcementService.markRead(parentContext, developmentAnnouncementIds.sportsDay);
+    expect(secondRead.ok).toBe(true);
+    expect(secondRead.ok ? secondRead.value.readAt : undefined).toBe(firstRead.value.readAt);
+  });
+
+  it('updates aggregate readership totals and read rate', () => {
+    const { announcementService, identityService } = createServices();
+    const adminContext = contextFor(identityService, developmentIdentityIds.admin);
+    const parentContext = contextFor(identityService, developmentIdentityIds.parentBen);
+
+    const before = readershipValue(announcementService.getAuthorizedReadershipSummary(adminContext, developmentAnnouncementIds.sportsDay));
+    expect(before.delivered).toBe(4);
+    expect(before.read).toBe(2);
+    expect(before.readRate).toBe(50);
+
+    announcementService.markRead(parentContext, developmentAnnouncementIds.sportsDay);
+
+    const after = readershipValue(announcementService.getAuthorizedReadershipSummary(adminContext, developmentAnnouncementIds.sportsDay));
+    expect(after.delivered).toBe(4);
+    expect(after.read).toBe(3);
+    expect(after.unread).toBe(1);
+    expect(after.readRate).toBe(75);
+  });
+
+  it('calculates recipient-group readership breakdowns', () => {
+    const { announcementService, identityService } = createServices();
+    const adminContext = contextFor(identityService, developmentIdentityIds.admin);
+
+    const summary = readershipValue(announcementService.getAuthorizedReadershipSummary(adminContext, developmentAnnouncementIds.sportsDay));
+
+    expect(summary.byGroup.parent_guardians).toEqual({ delivered: 2, read: 1, unread: 1 });
+    expect(summary.byGroup.students).toEqual({ delivered: 1, read: 0, unread: 1 });
+    expect(summary.byGroup.staff).toEqual({ delivered: 1, read: 1, unread: 0 });
+  });
+});
