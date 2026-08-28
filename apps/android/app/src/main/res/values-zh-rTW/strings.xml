@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Klassify Education</string>
+    <string name="tab_home">首頁</string>
+    <string name="tab_announcements">最新消息</string>
+    <string name="tab_children">我的子女</string>
+    <string name="tab_settings">設定</string>
+</resources>
