@@ -25,7 +25,7 @@ Phase 4B - Final hardening
 
 ## Remaining
 - [x] Push Phase 4B hardening commit
-- [ ] Confirm PR #4 Web, C++, and Android CI are green
+- [x] Confirm PR #4 Web, C++, and Android CI are green
 
 ## Last Successful Validation
 - `npm ci` passed using the temporary Node/npm toolchain.
@@ -33,7 +33,8 @@ Phase 4B - Final hardening
 - `npm test --workspace apps/web` passed: 79 tests.
 - `npm run build --workspace apps/web` passed.
 - `git diff --check` passed.
-- GitHub CI previously passed Web, C++, Android `testDebugUnitTest`, and Android `assembleDebug` for Phase 4 before this hardening commit.
+- Local wrapper bootstrap `gradlew.bat -v` passed with Gradle 8.11.1.
+- GitHub CI run #9 passed Web, C++, Android `testDebugUnitTest`, and Android `assembleDebug` on commit `60912f4`.
 
 ## Known Issues
 - Local Android SDK environment variables are unavailable.
@@ -49,7 +50,7 @@ Phase 4B - Final hardening
 - Gradle wrapper 8.11.1 added under `apps/android`.
 - Local wrapper bootstrap `gradlew.bat -v` passed with Gradle 8.11.1.
 - Local `gradlew.bat testDebugUnitTest` with JDK 23 could not complete because no Android SDK path is configured.
-- GitHub CI must validate `./gradlew testDebugUnitTest` and `./gradlew assembleDebug` using Java 17 after the hardening push.
+- GitHub CI validated `./gradlew testDebugUnitTest` and `./gradlew assembleDebug` using Java 17 on commit `60912f4`.
 
 ### iOS
 - SwiftUI source architecture added and localization keys aligned.
@@ -57,7 +58,7 @@ Phase 4B - Final hardening
 - iOS CI remains deferred until a valid Xcode project exists.
 
 ## Next Exact Action
-Commit and push Phase 4B hardening, inspect PR #4 CI, then squash-merge feature/parent-app into develop if CI is green.
+Squash-merge PR #4 into `develop`.
 
 ## Commits
 - a14b8c0 feat: add parent mobile domain foundation
@@ -65,3 +66,6 @@ Commit and push Phase 4B hardening, inspect PR #4 CI, then squash-merge feature/
 - 805c6a8 docs: document parent app architecture
 - c6cbf9b chore: finalize parent app progress
 - 481e2c3 fix: harden parent mobile experience
+- 0a3a614 chore: record parent hardening progress
+- 60912f4 fix: use official android gradle wrapper
+
