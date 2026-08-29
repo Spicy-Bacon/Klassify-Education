@@ -47,4 +47,4 @@ Milestone 2 - Admin Forms views
 Implement Milestone 2 by wiring Forms into Admin navigation and adding list/detail/create/edit/responses route shells backed by `FormService`.
 
 ## Commits
-- Pending Milestone 1 commit.
+- `dd84f43` `feat: add forms domain foundation`
