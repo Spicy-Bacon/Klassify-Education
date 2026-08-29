@@ -4,7 +4,7 @@ AI School Platform is a modular school operations, communication, AI and media e
 
 Development status: **Pre-MVP / Foundation Stage**
 
-Current active product area: **Announcements**
+Current active product area: **Forms & Digital Reply Slips**
 
 ## Product
 
@@ -64,7 +64,7 @@ Open pull requests into `develop`. Do not merge feature branches directly into `
 
 ## Current Scope
 
-This repository currently provides the platform foundation plus the first development-backed announcements workflow. It does not implement production business logic, payments, grading, LMS functionality, admissions, livestreaming, facial recognition, advanced video generation or cross-school analytics.
+This repository currently provides the platform foundation, the first development-backed announcements workflow and the Phase 5 Forms & Digital Reply Slips foundation. It does not implement production business logic, payments, grading, LMS functionality, admissions, livestreaming, facial recognition, advanced video generation or cross-school analytics.
 
 Backend provider, database, API framework, authentication, object storage, AI provider, deployment platform and service topology decisions are intentionally deferred.
 
@@ -96,6 +96,13 @@ Open `apps/android` with Android Studio or run a Gradle build from that director
 ### iOS
 
 See `apps/ios/README.md`. A full Xcode project is intentionally deferred until the app identifier, signing and project generation approach are confirmed.
+
+
+## Forms & Digital Reply Slips
+
+Phase 5 adds development-backed digital reply slips for the Connect pillar. Web Admin can create draft forms, target school/year/class audiences, publish forms, view response tracking and record reminder requests. Native Android and iOS parent foundations expose parent-scoped form tasks and development-only submission flows.
+
+The implementation remains intentionally bounded by repository/service interfaces. Production authentication, persistence, backend APIs and notification delivery are still deferred.
 
 ## Parent App V1
 
