@@ -38,10 +38,24 @@ struct ParentHomeView: View {
                             .accessibilityLabel("\(state.unreadCount) unread announcements")
                     }
 
+                    Section("home_outstanding_forms") {
+                        Text("\(state.outstandingFormCount)")
+                            .font(.title.bold())
+                            .accessibilityLabel("\(state.outstandingFormCount) outstanding forms")
+                    }
+
                     Section("home_latest_announcements") {
                         ForEach(state.announcements.prefix(3)) { announcement in
                             NavigationLink(value: announcement) {
                                 AnnouncementSummaryRow(announcement: announcement)
+                            }
+                        }
+                    }
+
+                    Section("home_forms") {
+                        ForEach(state.forms.filter { $0.status == .outstanding }.prefix(3)) { form in
+                            NavigationLink(value: form) {
+                                FormSummaryRow(form: form)
                             }
                         }
                     }
@@ -51,15 +65,13 @@ struct ParentHomeView: View {
                             Text("\(child.displayName) - \(child.className)")
                         }
                     }
-
-                    Section("home_action_required") {
-                        Text("home_forms_coming_soon")
-                            .foregroundStyle(.secondary)
-                    }
                 }
                 .navigationTitle("home_title")
                 .navigationDestination(for: ParentAnnouncement.self) { announcement in
                     AnnouncementDetailView(service: service, session: session, announcementId: announcement.id)
+                }
+                .navigationDestination(for: ParentFormTask.self) { form in
+                    FormDetailView(service: service, session: session, recipientId: form.recipientId)
                 }
             } else {
                 ErrorStateView(message: "Parent home could not be loaded.")

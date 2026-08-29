@@ -8,23 +8,27 @@ import { adminRoutes } from './routes';
 import { AnnouncementDetailPage, AnnouncementEditorPage, AnnouncementsPage } from './pages/AnnouncementsPage';
 import { AdminHome } from './pages/AdminHome';
 import { ClassDetailPage, ClassesPage } from './pages/ClassesPage';
+import { FormDetailPage, FormEditorPage, FormResponsesPage, FormsPage } from './pages/FormsPage';
 import { ParentDetailPage, ParentsPage } from './pages/ParentsPage';
 import { StaffPage } from './pages/StaffPage';
 import { StudentDetailPage, StudentsPage } from './pages/StudentsPage';
 import { UsersPage } from './pages/UsersPage';
 import type { AnnouncementService } from '../announcements/AnnouncementService';
+import type { FormService } from '../forms/FormService';
 import type { IdentityService } from '../identity/identityService';
 import type { IdentityOption } from '../identity/identityTypes';
 
 export function AdminApp({
   allowIdentitySwitching,
   announcementService,
+  formService,
   identityOptions,
   identityService,
   initialUserId,
 }: {
   allowIdentitySwitching: boolean;
   announcementService: AnnouncementService;
+  formService: FormService;
   identityOptions: IdentityOption[];
   identityService: IdentityService;
   initialUserId: EntityId;
@@ -108,7 +112,7 @@ export function AdminApp({
         )}
         path="/admin"
       >
-        <Route index element={guarded('overview', <AdminHome service={identityService} announcementService={announcementService} userContext={userContext} />)} />
+        <Route index element={guarded('overview', <AdminHome service={identityService} announcementService={announcementService} formService={formService} userContext={userContext} />)} />
         <Route path="users" element={guarded('users', <UsersPage service={identityService} userContext={userContext} />)} />
         <Route path="students" element={guarded('students', <StudentsPage service={identityService} userContext={userContext} onAction={completeAction} />)} />
         <Route path="students/:studentId" element={guarded('students', <StudentDetailPage service={identityService} userContext={userContext} />)} />
@@ -121,6 +125,11 @@ export function AdminApp({
         <Route path="announcements/new" element={guarded('announcements', <AnnouncementEditorPage announcementService={announcementService} identityService={identityService} userContext={userContext} onAction={completeAction} />)} />
         <Route path="announcements/:announcementId" element={guarded('announcements', <AnnouncementDetailPage announcementService={announcementService} userContext={userContext} onAction={completeAction} />)} />
         <Route path="announcements/:announcementId/edit" element={guarded('announcements', <AnnouncementEditorPage announcementService={announcementService} identityService={identityService} userContext={userContext} onAction={completeAction} />)} />
+        <Route path="forms" element={guarded('forms', <FormsPage formService={formService} userContext={userContext} />)} />
+        <Route path="forms/new" element={guarded('forms', <FormEditorPage formService={formService} identityService={identityService} userContext={userContext} onAction={completeAction} />)} />
+        <Route path="forms/:formId" element={guarded('forms', <FormDetailPage formService={formService} userContext={userContext} onAction={completeAction} />)} />
+        <Route path="forms/:formId/edit" element={guarded('forms', <FormEditorPage formService={formService} identityService={identityService} userContext={userContext} onAction={completeAction} />)} />
+        <Route path="forms/:formId/responses" element={guarded('forms', <FormResponsesPage formService={formService} identityService={identityService} userContext={userContext} onAction={completeAction} />)} />
       </Route>
       <Route path="*" element={<Navigate replace to="/admin" />} />
     </Routes>

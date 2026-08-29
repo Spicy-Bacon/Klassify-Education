@@ -2,20 +2,25 @@
     <string name="app_name">Klassify Education</string>
     <string name="tab_home">Home</string>
     <string name="tab_announcements">Announcements</string>
+    <string name="tab_forms">Forms</string>
     <string name="tab_children">Children</string>
     <string name="tab_settings">Settings</string>
     <string name="home_title">Home</string>
     <string name="home_latest_announcements">Latest announcements</string>
+    <string name="home_forms">Forms</string>
     <string name="home_my_children">Your children</string>
     <string name="home_child_context">Child context</string>
     <string name="home_unread_announcements">Unread announcements</string>
+    <string name="home_outstanding_forms">Outstanding forms</string>
     <string name="home_view_all">View all</string>
     <string name="home_action_required">Action Required</string>
     <string name="home_forms_coming_soon">Forms coming soon</string>
     <string name="screen_announcements">Announcements</string>
+    <string name="screen_forms">Forms</string>
     <string name="screen_children">Children</string>
     <string name="screen_settings">Settings</string>
     <string name="empty_announcements">No announcements yet.</string>
+    <string name="empty_forms">No forms need your attention.</string>
     <string name="empty_children">No linked children were found.</string>
     <string name="error_title">Something needs attention</string>
     <string name="error_retry">Retry</string>
@@ -24,5 +29,5 @@
     <string name="settings_version">Version 0.1.0-dev</string>
     <string name="settings_development_build">Development build</string>
     <string name="language_english">English</string>
-    <string name="language_traditional_chinese">繁體中文</string>
+    <string name="language_traditional_chinese">Traditional Chinese</string>
 </resources>

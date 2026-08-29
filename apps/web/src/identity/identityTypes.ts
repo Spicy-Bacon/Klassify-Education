@@ -11,6 +11,7 @@ import type {
 } from '@ai-school-platform/contracts';
 import { Role, StaffClassAssignmentType } from '@ai-school-platform/contracts';
 import type { AnnouncementService } from '../announcements/AnnouncementService';
+import type { FormService } from '../forms/FormService';
 import type { IdentityService } from './identityService';
 
 export interface IdentityOption {
@@ -22,6 +23,7 @@ export interface ConfiguredIdentityApplication {
   mode: 'development';
   identityService: IdentityService;
   announcementService: AnnouncementService;
+  formService: FormService;
   initialUserId: EntityId;
   identityOptions: IdentityOption[];
   allowIdentitySwitching: true;
@@ -156,4 +158,4 @@ export interface AdminOverview {
   canUseManagementActions: boolean;
 }
 
-export type AdminSectionId = 'overview' | 'users' | 'students' | 'parents' | 'staff' | 'classes' | 'announcements';
+export type AdminSectionId = 'overview' | 'users' | 'students' | 'parents' | 'staff' | 'classes' | 'announcements' | 'forms';

@@ -75,6 +75,10 @@ export enum Permission {
   AnnouncementsCreate = 'announcements.create',
   AnnouncementsPublish = 'announcements.publish',
   FormsCreate = 'forms.create',
+  FormsPublish = 'forms.publish',
+  FormsViewResponses = 'forms.view_responses',
+  FormsRemind = 'forms.remind',
+  FormsSubmit = 'forms.submit',
   AttendanceManage = 'attendance.manage',
   MediaUpload = 'media.upload',
   MediaManage = 'media.manage',
@@ -101,6 +105,101 @@ export enum AnnouncementRecipientGroup {
   Staff = 'staff',
 }
 
+
+export enum FormStatus {
+  Draft = 'draft',
+  Published = 'published',
+  Closed = 'closed',
+  Archived = 'archived',
+}
+
+export enum FormQuestionType {
+  ShortText = 'short_text',
+  LongText = 'long_text',
+  SingleChoice = 'single_choice',
+  MultipleChoice = 'multiple_choice',
+  Checkbox = 'checkbox',
+  Date = 'date',
+  Acknowledgement = 'acknowledgement',
+  Consent = 'consent',
+}
+
+export enum FormAudienceType {
+  School = 'school',
+  YearGroup = 'year_group',
+  Class = 'class',
+}
+
+export interface FormQuestionOption {
+  id: EntityId;
+  label: string;
+}
+
+export interface FormQuestion {
+  id: EntityId;
+  type: FormQuestionType;
+  label: string;
+  description?: string;
+  required: boolean;
+  options?: FormQuestionOption[];
+}
+
+export interface FormAudience {
+  type: FormAudienceType;
+  targetIds: EntityId[];
+}
+
+export interface FormDefinition {
+  id: EntityId;
+  schoolId: EntityId;
+  title: string;
+  description?: string;
+  status: FormStatus;
+  authorUserId: EntityId;
+  createdAt: ISODateTime;
+  updatedAt: ISODateTime;
+  publishedAt?: ISODateTime;
+  deadlineAt?: ISODateTime;
+  closedAt?: ISODateTime;
+  audience: FormAudience[];
+  requiresChildContext: boolean;
+  questions: FormQuestion[];
+}
+
+export interface FormRecipient {
+  id: EntityId;
+  formId: EntityId;
+  schoolId: EntityId;
+  userId: EntityId;
+  studentId?: EntityId;
+  deliveredAt: ISODateTime;
+  submittedAt?: ISODateTime;
+  lastReminderRequestedAt?: ISODateTime;
+  reminderRequestCount: number;
+}
+
+export type FormAnswerValue =
+  | { type: 'text'; value: string }
+  | { type: 'selected_option'; optionId: EntityId }
+  | { type: 'selected_options'; optionIds: EntityId[] }
+  | { type: 'boolean'; value: boolean }
+  | { type: 'date'; value: ISODate };
+
+export interface FormAnswer {
+  questionId: EntityId;
+  value: FormAnswerValue;
+}
+
+export interface FormSubmission {
+  id: EntityId;
+  formId: EntityId;
+  schoolId: EntityId;
+  recipientId: EntityId;
+  submittedByUserId: EntityId;
+  studentId?: EntityId;
+  submittedAt: ISODateTime;
+  answers: FormAnswer[];
+}
 export enum DomainErrorCode {
   NotFound = 'NotFound',
   PermissionDenied = 'PermissionDenied',
@@ -223,6 +322,9 @@ export interface ResourceContext {
   schoolId: EntityId;
   classId?: EntityId;
   studentId?: EntityId;
+  yearGroupId?: EntityId;
+  formId?: EntityId;
+  recipientId?: EntityId;
 }
 
 export interface PermissionDecision {

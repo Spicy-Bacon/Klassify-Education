@@ -49,15 +49,64 @@ struct ParentAnnouncement: Identifiable, Hashable {
     let readAt: String?
 }
 
+enum ParentFormStatus: String, Hashable {
+    case outstanding
+    case submitted
+    case closed
+}
+
+enum ParentFormQuestionType: String, Hashable {
+    case acknowledgement
+    case consent
+    case shortText
+    case longText
+    case singleChoice
+}
+
+struct ParentFormQuestion: Identifiable, Hashable {
+    let id: String
+    let label: String
+    let type: ParentFormQuestionType
+    let required: Bool
+    let options: [String]
+}
+
+struct ParentFormAnswer: Hashable {
+    let questionId: String
+    let value: String
+}
+
+struct ParentFormTask: Identifiable, Hashable {
+    let recipientId: String
+    let formId: String
+    let title: String
+    let description: String
+    let deadlineAt: String?
+    let schoolId: String
+    let recipientUserId: String
+    let child: ChildSummary?
+    let status: ParentFormStatus
+    let questions: [ParentFormQuestion]
+    let submittedAt: String?
+    let submittedAnswers: [ParentFormAnswer]
+
+    var id: String { recipientId }
+}
+
 struct ParentHomeState: Hashable {
     let parent: ParentProfile
     let school: SchoolSummary
     let selectedChild: ChildSummary?
     let children: [ChildSummary]
     let announcements: [ParentAnnouncement]
+    let forms: [ParentFormTask]
 
     var unreadCount: Int {
         announcements.filter { $0.readAt == nil }.count
+    }
+
+    var outstandingFormCount: Int {
+        forms.filter { $0.status == .outstanding }.count
     }
 }
 
@@ -72,7 +121,7 @@ enum LanguagePreference: String, CaseIterable, Identifiable {
         case .english:
             return "English"
         case .traditionalChinese:
-            return "繁體中文"
+            return "Traditional Chinese"
         }
     }
 }

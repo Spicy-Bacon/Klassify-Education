@@ -254,8 +254,8 @@ describe('IdentityService scoped access', () => {
     const parentContext = contextFor(service, developmentIdentityIds.parentAmy);
     const studentContext = contextFor(service, developmentIdentityIds.studentChloeUser);
 
-    expect(service.getVisibleAdminSections(principalContext)).toEqual(['overview', 'users', 'students', 'parents', 'staff', 'classes', 'announcements']);
-    expect(service.getVisibleAdminSections(teacherContext)).toEqual(['overview', 'students', 'classes', 'announcements']);
+    expect(service.getVisibleAdminSections(principalContext)).toEqual(['overview', 'users', 'students', 'parents', 'staff', 'classes', 'announcements', 'forms']);
+    expect(service.getVisibleAdminSections(teacherContext)).toEqual(['overview', 'students', 'classes', 'announcements', 'forms']);
     expect(service.getVisibleAdminSections(parentContext)).toEqual([]);
     expect(service.getVisibleAdminSections(studentContext)).toEqual([]);
   });
@@ -265,7 +265,7 @@ describe('IdentityService scoped access', () => {
     const adminContext = contextFor(service, developmentIdentityIds.admin);
 
     expect(service.canAccessAdminPortal(adminContext)).toBe(true);
-    expect(service.getVisibleAdminSections(adminContext)).toEqual(['overview', 'users', 'students', 'parents', 'staff', 'classes', 'announcements']);
+    expect(service.getVisibleAdminSections(adminContext)).toEqual(['overview', 'users', 'students', 'parents', 'staff', 'classes', 'announcements', 'forms']);
     expect(service.canAccessAdminSection(adminContext, 'users').ok).toBe(true);
   });
 

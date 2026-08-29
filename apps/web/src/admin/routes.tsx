@@ -18,11 +18,11 @@ export const adminRoutes: AdminRouteDefinition[] = [
   { id: 'users', path: '/admin/users', label: 'Users', group: 'people', enabled: true },
   { id: 'classes', path: '/admin/classes', label: 'Classes', group: 'primary', enabled: true },
   { id: 'announcements', path: '/admin/announcements', label: 'Announcements', group: 'communication', enabled: true },
+  { id: 'forms', path: '/admin/forms', label: 'Forms', group: 'communication', enabled: true },
 ];
 
 export const futureAdminRoutes = [
   { path: '/admin/messaging', label: 'Messaging - later' },
-  { path: '/admin/forms', label: 'Forms' },
   { path: '/admin/attendance', label: 'Attendance' },
   { path: '/admin/events', label: 'Events' },
   { path: '/admin/media', label: 'Media' },

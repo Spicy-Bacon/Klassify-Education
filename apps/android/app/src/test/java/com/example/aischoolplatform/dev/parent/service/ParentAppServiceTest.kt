@@ -5,6 +5,9 @@ import com.example.aischoolplatform.dev.parent.data.InMemoryAppPreferenceReposit
 import com.example.aischoolplatform.dev.parent.model.ChildSummary
 import com.example.aischoolplatform.dev.parent.model.LanguagePreference
 import com.example.aischoolplatform.dev.parent.model.ParentAnnouncement
+import com.example.aischoolplatform.dev.parent.model.ParentFormAnswer
+import com.example.aischoolplatform.dev.parent.model.ParentFormStatus
+import com.example.aischoolplatform.dev.parent.model.ParentFormTask
 import com.example.aischoolplatform.dev.parent.model.ParentHomeState
 import com.example.aischoolplatform.dev.parent.model.ParentRole
 import com.example.aischoolplatform.dev.parent.model.ParentSession
@@ -16,9 +19,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ParentAppServiceTest {
-    private fun service(): ParentAppService {
+    private fun service(now: Instant = Instant.parse("2026-08-28T08:00:00Z")): ParentAppService {
         val repository = DevelopmentParentRepository()
-        return ParentAppService(repository, repository, InMemoryAppPreferenceRepository()) { Instant.parse("2026-08-28T08:00:00Z") }
+        return ParentAppService(repository, repository, repository, InMemoryAppPreferenceRepository()) { now }
     }
 
     @Test
@@ -92,6 +95,95 @@ class ParentAppServiceTest {
     }
 
     @Test
+    fun parentFormsOnlyIncludeAssignedSchoolAndLinkedChildren() {
+        val service = service()
+        val session = service.currentSession()!!
+
+        val result = service.forms(session) as ParentAppResult.Success<List<ParentFormTask>>
+        val ids = result.value.map { it.recipientId }
+
+        assertTrue(ids.contains("form-recipient-museum-amy-chloe"))
+        assertTrue(ids.contains("form-recipient-contact-amy"))
+        assertTrue(ids.contains("form-recipient-feedback-amy-ethan"))
+        assertFalse(ids.contains("form-recipient-unrelated-student"))
+        assertFalse(ids.contains("form-recipient-cross-school"))
+    }
+
+    @Test
+    fun homeStateCountsOutstandingForms() {
+        val service = service()
+        val session = service.currentSession()!!
+
+        val result = service.homeState(session) as ParentAppResult.Success<ParentHomeState>
+
+        assertEquals(2, result.value.outstandingFormCount)
+    }
+
+    @Test
+    fun submitFormRequiresExplicitConsent() {
+        val service = service()
+        val session = service.currentSession()!!
+
+        val result = service.submitForm(
+            session,
+            "form-recipient-museum-amy-chloe",
+            listOf(ParentFormAnswer("question-museum-consent", "false"))
+        )
+
+        assertTrue(result is ParentAppResult.Failure)
+    }
+
+    @Test
+    fun submitFormPersistsSubmittedState() {
+        val service = service()
+        val session = service.currentSession()!!
+
+        val result = service.submitForm(
+            session,
+            "form-recipient-museum-amy-chloe",
+            listOf(
+                ParentFormAnswer("question-museum-consent", "true"),
+                ParentFormAnswer("question-museum-note", "Pickup by guardian")
+            )
+        ) as ParentAppResult.Success<ParentFormTask>
+
+        assertEquals(ParentFormStatus.Submitted, result.value.status)
+        assertEquals("2026-08-28T08:00:00Z", result.value.submittedAt)
+
+        val reopened = service.form(session, "form-recipient-museum-amy-chloe") as ParentAppResult.Success<ParentFormTask>
+        assertEquals(ParentFormStatus.Submitted, reopened.value.status)
+    }
+
+    @Test
+    fun expiredFormCannotBeSubmitted() {
+        val service = service(Instant.parse("2026-09-13T08:00:00Z"))
+        val session = service.currentSession()!!
+
+        val result = service.submitForm(
+            session,
+            "form-recipient-museum-amy-chloe",
+            listOf(ParentFormAnswer("question-museum-consent", "true"))
+        )
+
+        assertTrue(result is ParentAppResult.Failure)
+        assertEquals("The deadline for this form has passed.", (result as ParentAppResult.Failure).message)
+    }
+
+    @Test
+    fun alreadySubmittedFormCannotBeSubmittedAgain() {
+        val service = service()
+        val session = service.currentSession()!!
+
+        val result = service.submitForm(
+            session,
+            "form-recipient-feedback-amy-ethan",
+            listOf(ParentFormAnswer("question-feedback-rating", "Clear"))
+        )
+
+        assertTrue(result is ParentAppResult.Failure)
+    }
+
+    @Test
     fun nonParentSessionIsRejected() {
         val service = service()
         val session = ParentSession("user-student-chloe", "school-demo", ParentRole.Student, false)
@@ -105,7 +197,7 @@ class ParentAppServiceTest {
     fun languagePreferencePersistsThroughRepositoryBoundary() {
         val preferences = InMemoryAppPreferenceRepository()
         val repository = DevelopmentParentRepository()
-        val service = ParentAppService(repository, repository, preferences)
+        val service = ParentAppService(repository, repository, repository, preferences)
 
         service.setLanguagePreference(LanguagePreference.TraditionalChinese)
 

@@ -76,6 +76,10 @@ The permission vocabulary is intentionally small and module-oriented:
 - `announcements.create`
 - `announcements.publish`
 - `forms.create`
+- `forms.publish`
+- `forms.view_responses`
+- `forms.remind`
+- `forms.submit`
 - `attendance.manage`
 - `media.upload`
 - `media.manage`
@@ -147,7 +151,7 @@ The web app consumes shared identity contracts through `@ai-school-platform/cont
 - Backend API framework and service topology.
 - Complete authorization system.
 - Identity sync with external systems.
-- Attendance, announcements, forms, messaging, media, AI and reporting domains.
+- Attendance, messaging, media, AI and reporting domains.
 
 ## C++ Core Decision
 
