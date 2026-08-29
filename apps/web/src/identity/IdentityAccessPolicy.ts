@@ -25,6 +25,10 @@ const schoolAdminCapabilities = new Set<Permission>([
   Permission.StudentsView,
   Permission.AnnouncementsCreate,
   Permission.AnnouncementsPublish,
+  Permission.FormsCreate,
+  Permission.FormsPublish,
+  Permission.FormsViewResponses,
+  Permission.FormsRemind,
 ]);
 
 const itAdminCapabilities = new Set<Permission>([
@@ -40,10 +44,15 @@ const teacherCapabilities = new Set<Permission>([
   Permission.AttendanceManage,
   Permission.AnnouncementsCreate,
   Permission.AnnouncementsPublish,
+  Permission.FormsCreate,
+  Permission.FormsPublish,
+  Permission.FormsViewResponses,
+  Permission.FormsRemind,
 ]);
 
 const parentCapabilities = new Set<Permission>([
   Permission.StudentsView,
+  Permission.FormsSubmit,
 ]);
 
 const studentCapabilities = new Set<Permission>([
@@ -138,6 +147,11 @@ export class IdentityAccessPolicy {
 
       if ((permission === Permission.StudentsView || permission === Permission.AttendanceManage) && resourceContext.studentId) {
         return isTeacherAssignedToStudent(snapshot, userContext.userId, resourceContext.studentId);
+      }
+
+      if ([Permission.FormsCreate, Permission.FormsPublish, Permission.FormsViewResponses, Permission.FormsRemind].includes(permission)) {
+        const classId = resourceContext.classId;
+        return classId !== undefined && isTeacherAssignedToClass(snapshot, userContext.userId, classId);
       }
     }
 
