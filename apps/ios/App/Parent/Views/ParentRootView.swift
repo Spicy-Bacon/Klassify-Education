@@ -47,6 +47,11 @@ struct ParentRootView: View {
             .tabItem { Label("tab_announcements", systemImage: "megaphone") }
 
             NavigationStack {
+                FormListView(service: service, session: session)
+            }
+            .tabItem { Label("tab_forms", systemImage: "checklist") }
+
+            NavigationStack {
                 ChildrenView(service: service, session: session, selectedChildId: $selectedChildId)
             }
             .tabItem { Label("tab_children", systemImage: "person.2") }

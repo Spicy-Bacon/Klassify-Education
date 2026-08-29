@@ -13,3 +13,9 @@ protocol ParentAnnouncementRepository {
     func announcement(for session: ParentSession, announcementId: String) -> ParentAnnouncement?
     func markRead(for session: ParentSession, announcementId: String, readAt: String) -> ParentAnnouncement?
 }
+
+protocol ParentFormRepository {
+    func formTasks(for session: ParentSession) -> [ParentFormTask]
+    func formTask(for session: ParentSession, recipientId: String) -> ParentFormTask?
+    func submitForm(for session: ParentSession, recipientId: String, answers: [ParentFormAnswer], submittedAt: String) -> ParentFormTask?
+}

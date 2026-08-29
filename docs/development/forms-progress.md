@@ -4,7 +4,7 @@ Branch: feature/forms
 Phase: Phase 5 - Forms & Digital Reply Slips
 
 ## Current Milestone
-Milestone 6 - iOS Parent Forms
+Milestone 7 - Integration / quality / documentation
 
 ## Completed
 - [x] Branch `feature/forms` created from `develop` commit `9c38fd4`
@@ -13,9 +13,9 @@ Milestone 6 - iOS Parent Forms
 - [x] Milestone 3 - Form builder
 - [x] Milestone 4 - Publishing / responses / reminders
 - [x] Milestone 5 - Android Parent Forms
+- [x] Milestone 6 - iOS Parent Forms
 
 ## Remaining
-- [ ] Milestone 6 - iOS Parent Forms
 - [ ] Milestone 7 - Integration / quality / documentation
 
 ## Last Successful Validation
@@ -24,10 +24,13 @@ Milestone 6 - iOS Parent Forms
 - `npm test --workspace apps/web` passed: 102 tests.
 - `npm run build --workspace apps/web` passed.
 - Android Gradle was attempted. Java 25.0.2 failed Kotlin/Gradle parsing; JDK 23 progressed further but Android SDK was unavailable.
+- `swift --version` passed: Swift 6.3.3 for Windows.
+- `swiftc -typecheck` passed for iOS non-UI model/data/service files.
+- SwiftUI type-check was attempted and failed because the Windows Swift toolchain does not include the `SwiftUI` module.
 
 ## Known Issues
 - Local Android SDK is unavailable: `ANDROID_HOME` is unset and no standard local SDK path was found.
-- Local iOS build validation is expected to be unavailable on this Windows environment unless project/tooling has changed.
+- Local iOS SwiftUI/Xcode validation is unavailable on this Windows environment.
 - Local CMake availability is not yet verified for this branch.
 
 ## Platform Validation
@@ -43,13 +46,15 @@ Milestone 6 - iOS Parent Forms
 - Java 25.0.2 is incompatible with the current Kotlin/Gradle parser; setting `JAVA_HOME` to local JDK 23 passed that step.
 
 ### iOS
-- Not run yet for Phase 5.
+- Implemented Swift parent Forms tab, task list, detail and submission flow.
+- Non-UI Swift model/data/service files type-check with Swift 6.3.3 on Windows.
+- SwiftUI/Xcode build validation is unavailable: `xcodebuild` is not installed and `SwiftUI` is not present in the Windows Swift toolchain.
 
 ### C++
 - Not run yet for Phase 5.
 
 ## Next Exact Action
-Implement Milestone 6 by adding documented/native Swift parent form task screens where practical without generating broken Xcode project files.
+Complete Milestone 7 with architecture documentation, README updates, final web/C++ validation, diff review, final push and PR creation.
 
 ## Commits
 - `dd84f43` `feat: add forms domain foundation`
@@ -57,3 +62,4 @@ Implement Milestone 6 by adding documented/native Swift parent form task screens
 - `d66ae21` `feat: add form builder draft workflow`
 - `de6e70e` `test: cover forms response lifecycle`
 - `468d0ba` `feat: add android parent forms flow`
+- Pending Milestone 6 commit.
