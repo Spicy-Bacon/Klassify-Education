@@ -12,7 +12,7 @@ import {
   type User,
 } from '@ai-school-platform/contracts';
 import type { FormService } from '../../forms/FormService';
-import type { FormDetail, FormRecipientResolution } from '../../forms/formTypes';
+import type { FormRecipientResolution } from '../../forms/formTypes';
 import type { IdentityService } from '../../identity/identityService';
 import { EmptyState } from '../components/EmptyState';
 import { PageHeader } from '../components/PageHeader';
@@ -104,12 +104,10 @@ export function FormsPage({ formService, userContext }: {
 
 export function FormDetailPage({
   formService,
-  identityService,
   onAction,
   userContext,
 }: {
   formService: FormService;
-  identityService: IdentityService;
   onAction: <T>(result: DomainResult<T>, successMessage: string) => void;
   userContext: AuthenticatedUserContext;
 }) {
@@ -127,6 +125,7 @@ export function FormDetailPage({
   const item = detail.value;
   const canPublish = item.form.status === FormStatus.Draft;
   const canClose = item.form.status === FormStatus.Published;
+  const canViewResponses = formService.canViewResponses(userContext, item.form);
 
   return (
     <section className="panel">
@@ -171,7 +170,7 @@ export function FormDetailPage({
 
       <div className="form-actions">
         {item.form.status === FormStatus.Draft ? <Link className="button-link" to={`/admin/forms/${item.form.id}/edit`}>Edit draft</Link> : null}
-        <Link className="button-link" to={`/admin/forms/${item.form.id}/responses`}>View responses</Link>
+        {canViewResponses ? <Link className="button-link" to={`/admin/forms/${item.form.id}/responses`}>View responses</Link> : null}
         {canPublish ? (
           <button onClick={() => onAction(formService.publishForm(userContext, item.form.id), 'Form published.')} type="button">
             Publish
@@ -183,8 +182,6 @@ export function FormDetailPage({
           </button>
         ) : null}
       </div>
-
-      <FormRecipientPreview detail={item} identityService={identityService} />
     </section>
   );
 }
@@ -201,7 +198,7 @@ export function FormResponsesPage({
   userContext: AuthenticatedUserContext;
 }) {
   const { formId } = useParams();
-  const detail = formId ? formService.getFormById(userContext, formId) : undefined;
+  const detail = formId ? formService.getFormResponses(userContext, formId) : undefined;
 
   if (!detail) {
     return <PermissionDenied title="Responses unavailable" message="Form route is missing a form ID." />;
@@ -496,36 +493,6 @@ export function FormEditorPage({
           <Link to="/admin/forms">Cancel</Link>
         </div>
       </form>
-    </section>
-  );
-}
-
-function FormRecipientPreview({ detail, identityService }: {
-  detail: FormDetail;
-  identityService: IdentityService;
-}) {
-  if (detail.recipients.length === 0) {
-    return null;
-  }
-
-  const identitySnapshot = identityService.getSnapshot();
-  const usersById = userMap(identitySnapshot.users);
-
-  return (
-    <section className="form-box" aria-labelledby="form-recipient-title">
-      <h3 id="form-recipient-title">Recipients</h3>
-      <Table headers={['Recipient', 'Student context', 'Status']}>
-        {detail.recipients.map((recipient) => {
-          const student = recipient.studentId ? identitySnapshot.students.find((candidate) => candidate.id === recipient.studentId) : undefined;
-          return (
-            <tr key={recipient.id}>
-              <td>{usersById.get(recipient.userId)?.displayName ?? recipient.userId}</td>
-              <td>{student ? `${student.preferredName ?? student.firstName} ${student.lastName}` : '-'}</td>
-              <td>{recipient.submittedAt ? 'Submitted' : 'Outstanding'}</td>
-            </tr>
-          );
-        })}
-      </Table>
     </section>
   );
 }

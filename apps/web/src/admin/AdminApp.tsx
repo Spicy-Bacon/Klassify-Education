@@ -127,7 +127,7 @@ export function AdminApp({
         <Route path="announcements/:announcementId/edit" element={guarded('announcements', <AnnouncementEditorPage announcementService={announcementService} identityService={identityService} userContext={userContext} onAction={completeAction} />)} />
         <Route path="forms" element={guarded('forms', <FormsPage formService={formService} userContext={userContext} />)} />
         <Route path="forms/new" element={guarded('forms', <FormEditorPage formService={formService} identityService={identityService} userContext={userContext} onAction={completeAction} />)} />
-        <Route path="forms/:formId" element={guarded('forms', <FormDetailPage formService={formService} identityService={identityService} userContext={userContext} onAction={completeAction} />)} />
+        <Route path="forms/:formId" element={guarded('forms', <FormDetailPage formService={formService} userContext={userContext} onAction={completeAction} />)} />
         <Route path="forms/:formId/edit" element={guarded('forms', <FormEditorPage formService={formService} identityService={identityService} userContext={userContext} onAction={completeAction} />)} />
         <Route path="forms/:formId/responses" element={guarded('forms', <FormResponsesPage formService={formService} identityService={identityService} userContext={userContext} onAction={completeAction} />)} />
       </Route>

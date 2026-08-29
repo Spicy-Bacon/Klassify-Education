@@ -8,6 +8,7 @@ enum ParentAppError: Error, LocalizedError, Equatable {
     case announcementNotFound
     case formNotFound
     case formNotSubmittable
+    case formDeadlinePassed
     case requiredFormAnswersMissing
     case consentNotAccepted
 
@@ -27,6 +28,8 @@ enum ParentAppError: Error, LocalizedError, Equatable {
             return "Form was not found for this parent account."
         case .formNotSubmittable:
             return "This form cannot be submitted."
+        case .formDeadlinePassed:
+            return "The deadline for this form has passed."
         case .requiredFormAnswersMissing:
             return "Required form questions must be answered."
         case .consentNotAccepted:
@@ -120,10 +123,16 @@ final class ParentAppService {
         try requireParent(session)
         let task = try form(session: session, recipientId: recipientId)
         guard task.status == .outstanding else { throw ParentAppError.formNotSubmittable }
+        guard !deadlineHasPassed(task.deadlineAt) else { throw ParentAppError.formDeadlinePassed }
         try validateAnswers(task: task, answers: answers)
         let timestamp = ISO8601DateFormatter().string(from: now())
         guard let updated = formRepository.submitForm(for: session, recipientId: recipientId, answers: answers, submittedAt: timestamp) else { throw ParentAppError.formNotSubmittable }
         return updated
+    }
+
+    private func deadlineHasPassed(_ deadlineAt: String?) -> Bool {
+        guard let deadlineAt, let deadline = ISO8601DateFormatter().date(from: deadlineAt) else { return deadlineAt != nil }
+        return deadline <= now()
     }
 
     private func validateAnswers(task: ParentFormTask, answers: [ParentFormAnswer]) throws {

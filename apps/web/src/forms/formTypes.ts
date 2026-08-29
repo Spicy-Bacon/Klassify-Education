@@ -51,7 +51,6 @@ export interface FormRecipientResolution {
 
 export interface FormSubmissionInput {
   recipientId: EntityId;
-  submittedByUserId: EntityId;
   answers: FormAnswer[];
 }
 
@@ -76,7 +75,9 @@ export interface FormListItem {
   responseSummary: FormResponseSummary;
 }
 
-export interface FormDetail extends FormListItem {
+export interface FormDetail extends FormListItem {}
+
+export interface FormResponses extends FormListItem {
   recipients: FormRecipient[];
   submissions: FormSubmission[];
 }

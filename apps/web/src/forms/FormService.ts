@@ -24,6 +24,7 @@ import type {
   FormListFilter,
   FormListItem,
   FormRecipientResolution,
+  FormResponses,
   FormResponseSummary,
   FormSubmissionInput,
   ParentFormTask,
@@ -36,6 +37,7 @@ export class FormService {
     private readonly identityService: IdentityService,
     private readonly accessPolicy = new FormAccessPolicy(identityService),
     private readonly audienceResolver = new FormAudienceResolver(),
+    private readonly now: () => Date = () => new Date(),
   ) {}
 
   canCreate(userContext: AuthenticatedUserContext): boolean {
@@ -57,7 +59,7 @@ export class FormService {
       return validation;
     }
 
-    const timestamp = new Date().toISOString();
+    const timestamp = this.nowTimestamp();
     const form: FormDefinition = {
       id: this.repository.nextId('form'),
       schoolId: input.schoolId,
@@ -94,7 +96,7 @@ export class FormService {
       audience: input.audience === undefined ? formResult.value.audience : cloneAudience(input.audience),
       requiresChildContext: input.requiresChildContext === undefined ? formResult.value.requiresChildContext : input.requiresChildContext,
       questions: input.questions === undefined ? formResult.value.questions : cloneQuestions(input.questions),
-      updatedAt: new Date().toISOString(),
+      updatedAt: this.nowTimestamp(),
     };
 
     const access = this.canWriteDraftInput(userContext, {
@@ -154,7 +156,7 @@ export class FormService {
       return failure(DomainErrorCode.ValidationError, 'Form must resolve to at least one recipient before publishing.');
     }
 
-    const timestamp = new Date().toISOString();
+    const timestamp = this.nowTimestamp();
     const recipients = resolution.recipients.map((recipient) => ({
       id: this.repository.nextId('form_recipient'),
       formId: form.id,
@@ -188,7 +190,7 @@ export class FormService {
       return access;
     }
 
-    const timestamp = new Date().toISOString();
+    const timestamp = this.nowTimestamp();
     return {
       ok: true,
       value: this.repository.saveForm({ ...form, status: FormStatus.Closed, closedAt: timestamp, updatedAt: timestamp }),
@@ -212,6 +214,11 @@ export class FormService {
       return access;
     }
 
+    const deadlineValidation = this.validateSubmissionDeadline(form);
+    if (!deadlineValidation.ok) {
+      return deadlineValidation;
+    }
+
     if (recipient.submittedAt || snapshot.submissions.some((submission) => submission.recipientId === recipient.id)) {
       return failure(DomainErrorCode.ValidationError, 'This form task has already been submitted.');
     }
@@ -221,13 +228,13 @@ export class FormService {
       return answersValidation;
     }
 
-    const timestamp = new Date().toISOString();
+    const timestamp = this.nowTimestamp();
     const submission = this.repository.saveSubmission({
       id: this.repository.nextId('form_submission'),
       formId: form.id,
       schoolId: form.schoolId,
       recipientId: recipient.id,
-      submittedByUserId: input.submittedByUserId,
+      submittedByUserId: userContext.userId,
       studentId: recipient.studentId,
       submittedAt: timestamp,
       answers: input.answers.map((answer) => ({ ...answer, value: cloneAnswerValue(answer.value) })),
@@ -264,6 +271,24 @@ export class FormService {
       return access;
     }
 
+    return {
+      ok: true,
+      value: this.toListItem(identitySnapshot, formResult.value),
+    };
+  }
+
+  getFormResponses(userContext: AuthenticatedUserContext, formId: EntityId): DomainResult<FormResponses> {
+    const formResult = this.findForm(formId);
+    if (!formResult.ok) {
+      return formResult;
+    }
+
+    const identitySnapshot = this.getIdentitySnapshot();
+    const access = this.accessPolicy.canViewResponses(identitySnapshot, userContext, formResult.value);
+    if (!access.ok) {
+      return access;
+    }
+
     const snapshot = this.repository.getSnapshot();
     return {
       ok: true,
@@ -273,6 +298,10 @@ export class FormService {
         submissions: snapshot.submissions.filter((submission) => submission.formId === formResult.value.id),
       },
     };
+  }
+
+  canViewResponses(userContext: AuthenticatedUserContext, form: FormDefinition): boolean {
+    return this.accessPolicy.canViewResponses(this.getIdentitySnapshot(), userContext, form).ok;
   }
 
   getParentTasks(userContext: AuthenticatedUserContext): ParentFormTask[] {
@@ -325,7 +354,7 @@ export class FormService {
       return failure(DomainErrorCode.ValidationError, 'Reminder requests are only available for outstanding recipients.');
     }
 
-    const timestamp = new Date().toISOString();
+    const timestamp = this.nowTimestamp();
     return {
       ok: true,
       value: this.repository.saveRecipient({
@@ -413,7 +442,7 @@ export class FormService {
 
     if (input.deadlineAt) {
       const deadline = Date.parse(input.deadlineAt);
-      if (Number.isNaN(deadline) || deadline <= Date.now()) {
+      if (Number.isNaN(deadline) || deadline <= this.now().getTime()) {
         return failure(DomainErrorCode.ValidationError, 'Deadline must be a future ISO 8601 timestamp.');
       }
     }
@@ -450,6 +479,27 @@ export class FormService {
 
   private getIdentitySnapshot(): IdentitySnapshot {
     return this.identityService.getSnapshot();
+  }
+
+  private validateSubmissionDeadline(form: FormDefinition): DomainResult<true> {
+    if (!form.deadlineAt) {
+      return { ok: true, value: true };
+    }
+
+    const deadline = Date.parse(form.deadlineAt);
+    if (Number.isNaN(deadline)) {
+      return failure(DomainErrorCode.ValidationError, 'Form deadline is not a valid ISO 8601 timestamp.');
+    }
+
+    if (deadline <= this.now().getTime()) {
+      return failure(DomainErrorCode.ValidationError, 'The deadline for this form has passed.');
+    }
+
+    return { ok: true, value: true };
+  }
+
+  private nowTimestamp(): string {
+    return this.now().toISOString();
   }
 }
 

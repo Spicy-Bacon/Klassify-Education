@@ -231,6 +231,93 @@ describe('FormService', () => {
     expect(parentSetup.service.getVisibleForms(parentSetup.context)).toEqual([]);
     expect(studentSetup.service.getVisibleForms(studentSetup.context)).toEqual([]);
   });
+
+  it('allows a teacher to view permitted form metadata without receiving response records', () => {
+    const adminSetup = setup(developmentIdentityIds.admin);
+    const draft = adminSetup.service.createDraft(adminSetup.context, baseInput(adminSetup.context, {
+      title: 'Class 3A Admin Form',
+      audience: [{ type: FormAudienceType.Class, targetIds: [developmentIdentityIds.class3A] }],
+    }));
+    expect(draft.ok).toBe(true);
+    const published = adminSetup.service.publishForm(adminSetup.context, (draft as { ok: true; value: FormDefinition }).value.id);
+    expect(published.ok).toBe(true);
+
+    const teacherContext = adminSetup.identityService.createUserContext(developmentIdentityIds.teacher3A);
+    expect(teacherContext.ok).toBe(true);
+    const detail = teacherContext.ok ? adminSetup.service.getFormById(teacherContext.value, (draft as { ok: true; value: FormDefinition }).value.id) : undefined;
+
+    expect(detail?.ok).toBe(true);
+    if (detail?.ok) {
+      expect(detail.value.responseSummary.delivered).toBe(2);
+      expect('recipients' in detail.value).toBe(false);
+      expect('submissions' in detail.value).toBe(false);
+    }
+  });
+
+  it('rejects response retrieval for a teacher who can view metadata but did not author the form', () => {
+    const adminSetup = setup(developmentIdentityIds.admin);
+    const draft = adminSetup.service.createDraft(adminSetup.context, baseInput(adminSetup.context, {
+      title: 'Class 3A Admin Form',
+      audience: [{ type: FormAudienceType.Class, targetIds: [developmentIdentityIds.class3A] }],
+    }));
+    expect(draft.ok).toBe(true);
+    expect(adminSetup.service.publishForm(adminSetup.context, (draft as { ok: true; value: FormDefinition }).value.id).ok).toBe(true);
+
+    const teacherContext = adminSetup.identityService.createUserContext(developmentIdentityIds.teacher3A);
+    const result = teacherContext.ok
+      ? adminSetup.service.getFormResponses(teacherContext.value, (draft as { ok: true; value: FormDefinition }).value.id)
+      : undefined;
+
+    expect(result?.ok).toBe(false);
+    if (result && !result.ok) {
+      expect(result.error.code).toBe(DomainErrorCode.PermissionDenied);
+    }
+  });
+
+  it('allows an authorised same-school administrator to retrieve responses', () => {
+    const { service, context } = setup(developmentIdentityIds.admin);
+
+    const result = service.getFormResponses(context, developmentFormIds.museumTrip);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.recipients.length).toBe(2);
+      expect(result.value.submissions.length).toBe(1);
+    }
+  });
+
+  it('rejects cross-school form response access', () => {
+    const { service, context } = setup(developmentIdentityIds.otherTeacher);
+
+    const result = service.getFormResponses(context, developmentFormIds.museumTrip);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe(DomainErrorCode.PermissionDenied);
+    }
+  });
+
+  it('keeps teacher response retrieval scoped to authored assigned-class forms', () => {
+    const teacherSetup = setup(developmentIdentityIds.teacher3A);
+    const authored = teacherSetup.service.getFormResponses(teacherSetup.context, developmentFormIds.museumTrip);
+    expect(authored.ok).toBe(true);
+
+    const adminSetup = setup(developmentIdentityIds.admin);
+    const draft = adminSetup.service.createDraft(adminSetup.context, baseInput(adminSetup.context, {
+      title: 'Class 3A Admin Form',
+      audience: [{ type: FormAudienceType.Class, targetIds: [developmentIdentityIds.class3A] }],
+    }));
+    expect(draft.ok).toBe(true);
+    expect(adminSetup.service.publishForm(adminSetup.context, (draft as { ok: true; value: FormDefinition }).value.id).ok).toBe(true);
+
+    const teacherContext = adminSetup.identityService.createUserContext(developmentIdentityIds.teacher3A);
+    const unauthored = teacherContext.ok
+      ? adminSetup.service.getFormResponses(teacherContext.value, (draft as { ok: true; value: FormDefinition }).value.id)
+      : undefined;
+
+    expect(unauthored?.ok).toBe(false);
+  });
+
   it('publishes a draft and generates response tracking recipients', () => {
     const { service, context } = setup(developmentIdentityIds.admin);
     const draft = service.createDraft(context, baseInput(context));
@@ -241,7 +328,7 @@ describe('FormService', () => {
     expect(published.ok).toBe(true);
     if (published.ok) {
       expect(published.value.status).toBe(FormStatus.Published);
-      const detail = service.getFormById(context, published.value.id);
+      const detail = service.getFormResponses(context, published.value.id);
       expect(detail.ok).toBe(true);
       if (detail.ok) {
         expect(detail.value.responseSummary.delivered).toBe(2);
@@ -261,7 +348,6 @@ describe('FormService', () => {
     expect(task).toBeDefined();
     const result = service.submitForm(context, {
       recipientId: task?.recipient.id ?? '',
-      submittedByUserId: context.userId,
       answers: [
         { questionId: 'question_museum_consent', value: { type: 'boolean', value: true } },
       ],
@@ -277,7 +363,6 @@ describe('FormService', () => {
     const task = service.getParentTasks(context).find((candidate) => candidate.form.id === developmentFormIds.museumTrip);
     const submission = {
       recipientId: task?.recipient.id ?? '',
-      submittedByUserId: context.userId,
       answers: [
         { questionId: 'question_museum_consent', value: { type: 'boolean' as const, value: true } },
       ],
@@ -295,13 +380,12 @@ describe('FormService', () => {
   it('rejects a parent submitting another guardian recipient task', () => {
     const { service, context: adminContext } = setup(developmentIdentityIds.admin);
     const parentContext = setup(developmentIdentityIds.parentAmy).context;
-    const detail = service.getFormById(adminContext, developmentFormIds.museumTrip);
+    const detail = service.getFormResponses(adminContext, developmentFormIds.museumTrip);
 
     expect(detail.ok).toBe(true);
     const benRecipient = detail.ok ? detail.value.recipients.find((recipient) => recipient.userId === developmentIdentityIds.parentBen) : undefined;
     const result = service.submitForm(parentContext, {
       recipientId: benRecipient?.id ?? '',
-      submittedByUserId: parentContext.userId,
       answers: [
         { questionId: 'question_museum_consent', value: { type: 'boolean', value: true } },
       ],
@@ -315,7 +399,7 @@ describe('FormService', () => {
 
   it('records reminder requests only for outstanding recipients', () => {
     const { service, context } = setup(developmentIdentityIds.admin);
-    const detail = service.getFormById(context, developmentFormIds.museumTrip);
+    const detail = service.getFormResponses(context, developmentFormIds.museumTrip);
 
     expect(detail.ok).toBe(true);
     const amyRecipient = detail.ok ? detail.value.recipients.find((recipient) => recipient.userId === developmentIdentityIds.parentAmy) : undefined;
@@ -335,6 +419,87 @@ describe('FormService', () => {
     }
   });
 
+
+  it('uses authenticated context as the submission attribution', () => {
+    const { service, context } = setup(developmentIdentityIds.parentAmy);
+    const task = service.getParentTasks(context).find((candidate) => candidate.form.id === developmentFormIds.museumTrip);
+
+    const result = service.submitForm(context, {
+      recipientId: task?.recipient.id ?? '',
+      answers: [
+        { questionId: 'question_museum_consent', value: { type: 'boolean', value: true } },
+      ],
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.submittedByUserId).toBe(context.userId);
+    }
+  });
+
+  it('ignores forged submittedByUserId values on submission input', () => {
+    const { service, context } = setup(developmentIdentityIds.parentAmy);
+    const task = service.getParentTasks(context).find((candidate) => candidate.form.id === developmentFormIds.museumTrip);
+
+    const result = service.submitForm(context, {
+      recipientId: task?.recipient.id ?? '',
+      submittedByUserId: developmentIdentityIds.parentBen,
+      answers: [
+        { questionId: 'question_museum_consent', value: { type: 'boolean', value: true } },
+      ],
+    } as Parameters<FormService['submitForm']>[1]);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.submittedByUserId).toBe(context.userId);
+    }
+  });
+
+  it('allows submissions before the deadline', () => {
+    const { service, context } = setup(developmentIdentityIds.parentAmy, () => new Date('2026-09-01T08:00:00.000Z'));
+    const task = service.getParentTasks(context).find((candidate) => candidate.form.id === developmentFormIds.museumTrip);
+
+    const result = service.submitForm(context, {
+      recipientId: task?.recipient.id ?? '',
+      answers: [
+        { questionId: 'question_museum_consent', value: { type: 'boolean', value: true } },
+      ],
+    });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it('allows published submissions when no deadline is set', () => {
+    const { service, context } = setup(developmentIdentityIds.parentAmy);
+    const task = service.getParentTasks(context).find((candidate) => candidate.form.id === developmentFormIds.emergencyContact);
+
+    const result = service.submitForm(context, {
+      recipientId: task?.recipient.id ?? '',
+      answers: [
+        { questionId: 'question_emergency_ack', value: { type: 'boolean', value: true } },
+      ],
+    });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it('rejects submissions after the deadline', () => {
+    const { service, context } = setup(developmentIdentityIds.parentAmy, () => new Date('2026-09-13T08:00:00.000Z'));
+    const task = service.getParentTasks(context).find((candidate) => candidate.form.id === developmentFormIds.museumTrip);
+
+    const result = service.submitForm(context, {
+      recipientId: task?.recipient.id ?? '',
+      answers: [
+        { questionId: 'question_museum_consent', value: { type: 'boolean', value: true } },
+      ],
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe(DomainErrorCode.ValidationError);
+      expect(result.error.message).toBe('The deadline for this form has passed.');
+    }
+  });
   it('does not accept submissions after a form is closed', () => {
     const adminSetup = setup(developmentIdentityIds.admin);
     const parentContext = adminSetup.identityService.createUserContext(developmentIdentityIds.parentAmy);
@@ -348,7 +513,6 @@ describe('FormService', () => {
       : undefined;
     const result = parentContext.ok ? adminSetup.service.submitForm(parentContext.value, {
       recipientId: task?.recipient.id ?? '',
-      submittedByUserId: parentContext.value.userId,
       answers: [
         { questionId: 'question_museum_consent', value: { type: 'boolean', value: true } },
       ],
@@ -361,10 +525,10 @@ describe('FormService', () => {
   });
 });
 
-function setup(userId: string) {
+function setup(userId: string, now: () => Date = () => new Date('2026-08-29T06:00:00.000Z')) {
   const identityRepository = new DevelopmentIdentityRepository();
   const identityService = new IdentityService(identityRepository);
-  const service = new FormService(new DevelopmentFormRepository(), identityService);
+  const service = new FormService(new DevelopmentFormRepository(), identityService, undefined, undefined, now);
   const context = identityService.createUserContext(userId);
 
   if (!context.ok) {

@@ -101,6 +101,7 @@ class ParentAppService(
         val form = formRepository.formTask(session, recipientId)
             ?: return ParentAppResult.Failure("Form was not found for this parent account.")
         if (form.status != ParentFormStatus.Outstanding) return ParentAppResult.Failure("This form cannot be submitted.")
+        if (deadlineHasPassed(form.deadlineAt)) return ParentAppResult.Failure("The deadline for this form has passed.")
         val validation = validateAnswers(form, answers)
         if (validation != null) return ParentAppResult.Failure(validation)
         val updated = formRepository.submitForm(session, recipientId, answers, now().toString())
@@ -114,6 +115,9 @@ class ParentAppService(
         appPreferenceRepository.setLanguage(preference)
         return appPreferenceRepository.getLanguage()
     }
+
+    private fun deadlineHasPassed(deadlineAt: String?): Boolean =
+        deadlineAt?.let { runCatching { !Instant.parse(it).isAfter(now()) }.getOrDefault(true) } ?: false
 
     private fun validateAnswers(form: ParentFormTask, answers: List<ParentFormAnswer>): String? {
         val answersByQuestion = answers.associateBy { it.questionId }

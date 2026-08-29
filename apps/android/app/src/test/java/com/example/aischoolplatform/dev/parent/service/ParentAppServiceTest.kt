@@ -19,9 +19,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ParentAppServiceTest {
-    private fun service(): ParentAppService {
+    private fun service(now: Instant = Instant.parse("2026-08-28T08:00:00Z")): ParentAppService {
         val repository = DevelopmentParentRepository()
-        return ParentAppService(repository, repository, repository, InMemoryAppPreferenceRepository()) { Instant.parse("2026-08-28T08:00:00Z") }
+        return ParentAppService(repository, repository, repository, InMemoryAppPreferenceRepository()) { now }
     }
 
     @Test
@@ -152,6 +152,21 @@ class ParentAppServiceTest {
 
         val reopened = service.form(session, "form-recipient-museum-amy-chloe") as ParentAppResult.Success<ParentFormTask>
         assertEquals(ParentFormStatus.Submitted, reopened.value.status)
+    }
+
+    @Test
+    fun expiredFormCannotBeSubmitted() {
+        val service = service(Instant.parse("2026-09-13T08:00:00Z"))
+        val session = service.currentSession()!!
+
+        val result = service.submitForm(
+            session,
+            "form-recipient-museum-amy-chloe",
+            listOf(ParentFormAnswer("question-museum-consent", "true"))
+        )
+
+        assertTrue(result is ParentAppResult.Failure)
+        assertEquals("The deadline for this form has passed.", (result as ParentAppResult.Failure).message)
     }
 
     @Test
