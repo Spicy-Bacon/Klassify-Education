@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Klassify Education</string>
+    <string name="tab_home">首頁</string>
+    <string name="tab_announcements">最新消息</string>
+    <string name="tab_children">我的子女</string>
+    <string name="tab_settings">設定</string>
+    <string name="home_title">首頁</string>
+    <string name="home_latest_announcements">最新消息</string>
+    <string name="home_my_children">我的子女</string>
+    <string name="home_child_context">子女</string>
+    <string name="home_unread_announcements">未讀消息</string>
+    <string name="home_view_all">查看全部</string>
+    <string name="home_action_required">需要處理</string>
+    <string name="home_forms_coming_soon">表格即將推出</string>
+    <string name="screen_announcements">最新消息</string>
+    <string name="screen_children">我的子女</string>
+    <string name="screen_settings">設定</string>
+    <string name="empty_announcements">暫時沒有消息。</string>
+    <string name="empty_children">找不到已連結的子女。</string>
+    <string name="error_title">需要注意</string>
+    <string name="error_retry">重試</string>
+    <string name="settings_parent_profile">家長資料</string>
+    <string name="settings_language">選擇語言</string>
+    <string name="settings_version">版本 0.1.0-dev</string>
+    <string name="settings_development_build">開發版本</string>
+    <string name="language_english">English</string>
+    <string name="language_traditional_chinese">繁體中文</string>
+</resources>

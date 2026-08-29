@@ -96,3 +96,7 @@ Open `apps/android` with Android Studio or run a Gradle build from that director
 ### iOS
 
 See `apps/ios/README.md`. A full Xcode project is intentionally deferred until the app identifier, signing and project generation approach are confirmed.
+
+## Parent App V1
+
+Phase 4 adds the first native parent/guardian mobile experience in Android and iOS source foundations, covering linked children, announcements, read state and settings without choosing production authentication or backend infrastructure.
