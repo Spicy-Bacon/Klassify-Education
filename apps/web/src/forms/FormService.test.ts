@@ -231,6 +231,134 @@ describe('FormService', () => {
     expect(parentSetup.service.getVisibleForms(parentSetup.context)).toEqual([]);
     expect(studentSetup.service.getVisibleForms(studentSetup.context)).toEqual([]);
   });
+  it('publishes a draft and generates response tracking recipients', () => {
+    const { service, context } = setup(developmentIdentityIds.admin);
+    const draft = service.createDraft(context, baseInput(context));
+
+    expect(draft.ok).toBe(true);
+    const published = service.publishForm(context, (draft as { ok: true; value: FormDefinition }).value.id);
+
+    expect(published.ok).toBe(true);
+    if (published.ok) {
+      expect(published.value.status).toBe(FormStatus.Published);
+      const detail = service.getFormById(context, published.value.id);
+      expect(detail.ok).toBe(true);
+      if (detail.ok) {
+        expect(detail.value.responseSummary.delivered).toBe(2);
+        expect(detail.value.responseSummary.submitted).toBe(0);
+        expect(detail.value.recipients.map((recipient) => recipient.userId).sort()).toEqual([
+          developmentIdentityIds.parentAmy,
+          developmentIdentityIds.parentBen,
+        ].sort());
+      }
+    }
+  });
+
+  it('allows a parent to submit an assigned child-specific form task', () => {
+    const { service, context } = setup(developmentIdentityIds.parentAmy);
+    const task = service.getParentTasks(context).find((candidate) => candidate.form.id === developmentFormIds.museumTrip);
+
+    expect(task).toBeDefined();
+    const result = service.submitForm(context, {
+      recipientId: task?.recipient.id ?? '',
+      submittedByUserId: context.userId,
+      answers: [
+        { questionId: 'question_museum_consent', value: { type: 'boolean', value: true } },
+      ],
+    });
+
+    expect(result.ok).toBe(true);
+    const updatedTask = service.getParentTasks(context).find((candidate) => candidate.recipient.id === task?.recipient.id);
+    expect(updatedTask?.submission?.submittedByUserId).toBe(context.userId);
+  });
+
+  it('rejects duplicate submissions for the same recipient task', () => {
+    const { service, context } = setup(developmentIdentityIds.parentAmy);
+    const task = service.getParentTasks(context).find((candidate) => candidate.form.id === developmentFormIds.museumTrip);
+    const submission = {
+      recipientId: task?.recipient.id ?? '',
+      submittedByUserId: context.userId,
+      answers: [
+        { questionId: 'question_museum_consent', value: { type: 'boolean' as const, value: true } },
+      ],
+    };
+
+    expect(service.submitForm(context, submission).ok).toBe(true);
+    const duplicate = service.submitForm(context, submission);
+
+    expect(duplicate.ok).toBe(false);
+    if (!duplicate.ok) {
+      expect(duplicate.error.code).toBe(DomainErrorCode.ValidationError);
+    }
+  });
+
+  it('rejects a parent submitting another guardian recipient task', () => {
+    const { service, context: adminContext } = setup(developmentIdentityIds.admin);
+    const parentContext = setup(developmentIdentityIds.parentAmy).context;
+    const detail = service.getFormById(adminContext, developmentFormIds.museumTrip);
+
+    expect(detail.ok).toBe(true);
+    const benRecipient = detail.ok ? detail.value.recipients.find((recipient) => recipient.userId === developmentIdentityIds.parentBen) : undefined;
+    const result = service.submitForm(parentContext, {
+      recipientId: benRecipient?.id ?? '',
+      submittedByUserId: parentContext.userId,
+      answers: [
+        { questionId: 'question_museum_consent', value: { type: 'boolean', value: true } },
+      ],
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe(DomainErrorCode.PermissionDenied);
+    }
+  });
+
+  it('records reminder requests only for outstanding recipients', () => {
+    const { service, context } = setup(developmentIdentityIds.admin);
+    const detail = service.getFormById(context, developmentFormIds.museumTrip);
+
+    expect(detail.ok).toBe(true);
+    const amyRecipient = detail.ok ? detail.value.recipients.find((recipient) => recipient.userId === developmentIdentityIds.parentAmy) : undefined;
+    const benRecipient = detail.ok ? detail.value.recipients.find((recipient) => recipient.userId === developmentIdentityIds.parentBen) : undefined;
+
+    const reminder = service.requestReminder(context, amyRecipient?.id ?? '');
+    expect(reminder.ok).toBe(true);
+    if (reminder.ok) {
+      expect(reminder.value.reminderRequestCount).toBe(1);
+      expect(reminder.value.lastReminderRequestedAt).toBeDefined();
+    }
+
+    const submittedReminder = service.requestReminder(context, benRecipient?.id ?? '');
+    expect(submittedReminder.ok).toBe(false);
+    if (!submittedReminder.ok) {
+      expect(submittedReminder.error.code).toBe(DomainErrorCode.ValidationError);
+    }
+  });
+
+  it('does not accept submissions after a form is closed', () => {
+    const adminSetup = setup(developmentIdentityIds.admin);
+    const parentContext = adminSetup.identityService.createUserContext(developmentIdentityIds.parentAmy);
+
+    expect(parentContext.ok).toBe(true);
+    const closeResult = adminSetup.service.closeForm(adminSetup.context, developmentFormIds.museumTrip);
+    expect(closeResult.ok).toBe(true);
+
+    const task = parentContext.ok
+      ? adminSetup.service.getParentTasks(parentContext.value).find((candidate) => candidate.form.id === developmentFormIds.museumTrip)
+      : undefined;
+    const result = parentContext.ok ? adminSetup.service.submitForm(parentContext.value, {
+      recipientId: task?.recipient.id ?? '',
+      submittedByUserId: parentContext.value.userId,
+      answers: [
+        { questionId: 'question_museum_consent', value: { type: 'boolean', value: true } },
+      ],
+    }) : undefined;
+
+    expect(result?.ok).toBe(false);
+    if (result && !result.ok) {
+      expect(result.error.code).toBe(DomainErrorCode.ValidationError);
+    }
+  });
 });
 
 function setup(userId: string) {
