@@ -68,4 +68,4 @@ Push final Phase 5 commits and open the Pull Request from `feature/forms` to `de
 - `de6e70e` `test: cover forms response lifecycle`
 - `468d0ba` `feat: add android parent forms flow`
 - `fd45d27` `feat: add ios parent forms flow`
-- Pending Milestone 7 commit.
+- `d39f53b` `docs: document forms workflows`
