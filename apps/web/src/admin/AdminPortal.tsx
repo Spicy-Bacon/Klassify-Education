@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import type { EntityId } from '@ai-school-platform/contracts';
+import type { EntityId } from '@klassify/contracts';
 import { AdminApp } from './AdminApp';
 import type { AnnouncementService } from '../announcements/AnnouncementService';
 import type { FormService } from '../forms/FormService';

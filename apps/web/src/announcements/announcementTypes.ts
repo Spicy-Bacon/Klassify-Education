@@ -8,7 +8,7 @@ import type {
   EntityId,
   ISODateTime,
   User,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 
 export interface AnnouncementInput {
   schoolId: EntityId;

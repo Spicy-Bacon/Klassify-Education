@@ -6,7 +6,7 @@ import {
   type FormDefinition,
   type FormRecipient,
   type FormSubmission,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import { developmentIdentityIds } from '../identity/developmentIdentityRepository';
 import type { FormRepository } from './FormRepository';
 import type { FormSnapshot } from './formTypes';

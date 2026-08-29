@@ -9,7 +9,7 @@ import {
   type AuthenticatedUserContext,
   type DomainResult,
   type EntityId,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import type { IdentitySnapshot } from '../identity/identityRepository';
 import type { IdentityService } from '../identity/identityService';
 import { AnnouncementAccessPolicy } from './AnnouncementAccessPolicy';

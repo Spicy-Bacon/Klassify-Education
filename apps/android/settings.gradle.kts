@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AISchoolPlatformAndroid"
+rootProject.name = "KlassifyEducationAndroid"
 include(":app")

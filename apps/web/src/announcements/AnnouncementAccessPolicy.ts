@@ -11,7 +11,7 @@ import {
   type AuthenticatedUserContext,
   type DomainResult,
   type EntityId,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import { isTeacherAssignedToClass } from '../identity/IdentityAccessPolicy';
 import type { IdentitySnapshot } from '../identity/identityRepository';
 import type { IdentityService } from '../identity/identityService';

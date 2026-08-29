@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
-import { GuardianRelationshipType, Role } from '@ai-school-platform/contracts';
+import { GuardianRelationshipType, Role } from '@klassify/contracts';
 import { DetailBox } from '../components/DetailBox';
 import { EmptyState } from '../components/EmptyState';
 import { FormBox } from '../components/FormBox';

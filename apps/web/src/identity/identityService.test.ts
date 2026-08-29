@@ -4,7 +4,7 @@ import {
   GuardianRelationshipType,
   Permission,
   StaffClassAssignmentType,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import { createUnconfiguredIdentityApplication, isConfiguredIdentityApplication } from './applicationIdentity';
 import { DevelopmentIdentityRepository, developmentIdentityIds } from './developmentIdentityRepository';
 import { IdentityService } from './identityService';

@@ -51,7 +51,7 @@ Read state belongs to the announcement recipient, not only to component state. T
 
 ## Android Architecture
 
-Android uses Kotlin, Jetpack Compose, and Material 3. The current package remains the development placeholder `com.example.aischoolplatform.dev` until final packaging is decided.
+Android uses Kotlin, Jetpack Compose, and Material 3. The current package remains the development placeholder `com.klassify.education.dev` until final packaging is decided.
 
 Key areas:
 

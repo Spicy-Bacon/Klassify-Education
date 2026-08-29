@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Outlet } from 'react-router-dom';
-import type { EntityId, User } from '@ai-school-platform/contracts';
+import type { EntityId, User } from '@klassify/contracts';
 import { AdminSidebar } from './components/AdminSidebar';
 import { AdminTopBar } from './components/AdminTopBar';
 import type { AdminRouteDefinition } from './routes';

@@ -1,6 +1,6 @@
 # Architecture Overview
 
-AI School Platform is a modular school operations, communication, AI and media ecosystem organized around Connect, Manage and Capture.
+Klassify Education is a modular school operations, communication, AI and media ecosystem organized around Connect, Manage and Capture.
 
 ## Client Direction
 

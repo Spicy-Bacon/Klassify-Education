@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { DomainErrorCode, StaffClassAssignmentType, type DomainResult, type EntityId } from '@ai-school-platform/contracts';
+import { DomainErrorCode, StaffClassAssignmentType, type DomainResult, type EntityId } from '@klassify/contracts';
 import { DetailBox } from '../components/DetailBox';
 import { EmptyState } from '../components/EmptyState';
 import { FormBox } from '../components/FormBox';

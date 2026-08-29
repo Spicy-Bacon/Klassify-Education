@@ -7,7 +7,7 @@ import {
   type EntityId,
   type PermissionDecision,
   type ResourceContext,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import type { IdentitySnapshot } from './identityRepository';
 
 const schoolWideRoles = new Set<Role>([

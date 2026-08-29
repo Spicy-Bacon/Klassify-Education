@@ -5,7 +5,7 @@ import {
   AnnouncementStatus,
   DomainErrorCode,
   type AuthenticatedUserContext,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import { DevelopmentIdentityRepository, developmentIdentityIds } from '../identity/developmentIdentityRepository';
 import { IdentityService } from '../identity/identityService';
 import { DevelopmentAnnouncementRepository } from './DevelopmentAnnouncementRepository';

@@ -5,7 +5,7 @@ import {
   type Announcement,
   type AnnouncementRecipient,
   type EntityId,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import { developmentIdentityIds } from '../identity/developmentIdentityRepository';
 import type { AnnouncementRepository } from './AnnouncementRepository';
 import type { AnnouncementSnapshot } from './announcementTypes';

@@ -1,10 +1,10 @@
-# AI School Platform
+# Klassify Education
 
-AI School Platform is a modular school operations, communication, AI and media ecosystem.
+Klassify Education is a modular school operations, communication, AI and media ecosystem.
 
 Development status: **Pre-MVP / Foundation Stage**
 
-Current active product area: **Forms & Digital Reply Slips**
+Current active product area: **Frontend Foundation / Design System**
 
 ## Product
 
@@ -32,7 +32,15 @@ Photography, private media and future high-performance media services, including
 | `apps/ios` | Swift iOS foundation and documented project structure. |
 | `core` | Shared C++20 client core for performance-sensitive cross-platform logic. |
 | `services` | Placeholder for backend decisions that are intentionally open. |
-| `packages/contracts` | Placeholder for future platform-neutral contracts and shared concepts. |
+| `packages/contracts` | Platform-neutral contracts and shared concepts. |
+
+## Completed Foundations
+
+- Identity and School Structure.
+- Admin Portal Core.
+- Announcements.
+- Parent App V1.
+- Forms / Digital Reply Slips.
 
 ## Identity & School Structure
 
@@ -40,7 +48,7 @@ The first real product feature establishes the school-owned identity foundation 
 
 The implementation is intentionally platform-neutral and development-only where persistence or authentication would otherwise be required. Production authentication, database and backend infrastructure choices remain deferred.
 
-The web app consumes shared contracts through the npm workspace package `@ai-school-platform/contracts`.
+The web app consumes shared contracts through the npm workspace package `@klassify/contracts`.
 
 ## Branch Strategy
 
@@ -64,7 +72,7 @@ Open pull requests into `develop`. Do not merge feature branches directly into `
 
 ## Current Scope
 
-This repository currently provides the platform foundation, the first development-backed announcements workflow and the Phase 5 Forms & Digital Reply Slips foundation. It does not implement production business logic, payments, grading, LMS functionality, admissions, livestreaming, facial recognition, advanced video generation or cross-school analytics.
+This repository currently provides the platform foundation, identity and school structure, the Admin Portal core, announcements, Parent App V1 and Forms / Digital Reply Slips. It does not implement production business logic, payments, grading, LMS functionality, admissions, livestreaming, facial recognition, advanced video generation or cross-school analytics.
 
 Backend provider, database, API framework, authentication, object storage, AI provider, deployment platform and service topology decisions are intentionally deferred.
 
@@ -97,13 +105,6 @@ Open `apps/android` with Android Studio or run a Gradle build from that director
 
 See `apps/ios/README.md`. A full Xcode project is intentionally deferred until the app identifier, signing and project generation approach are confirmed.
 
-
-## Forms & Digital Reply Slips
-
-Phase 5 adds development-backed digital reply slips for the Connect pillar. Web Admin can create draft forms, target school/year/class audiences, publish forms, view response tracking and record reminder requests. Native Android and iOS parent foundations expose parent-scoped form tasks and development-only submission flows.
-
-The implementation remains intentionally bounded by repository/service interfaces. Production authentication, persistence, backend APIs and notification delivery are still deferred.
-
 ## Parent App V1
 
-Phase 4 adds the first native parent/guardian mobile experience in Android and iOS source foundations, covering linked children, announcements, read state and settings without choosing production authentication or backend infrastructure.
+Phase 4 adds the first native parent/guardian mobile experience in Android and iOS source foundations, covering linked children, announcements, read state, forms and settings without choosing production authentication or backend infrastructure.

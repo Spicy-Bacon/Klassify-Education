@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Role } from '@ai-school-platform/contracts';
+import { Role } from '@klassify/contracts';
 import { EmptyState } from '../components/EmptyState';
 import { FormBox } from '../components/FormBox';
 import { PageHeader } from '../components/PageHeader';

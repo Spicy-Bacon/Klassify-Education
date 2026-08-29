@@ -1,4 +1,4 @@
-import type { Announcement, AnnouncementRecipient, EntityId } from '@ai-school-platform/contracts';
+import type { Announcement, AnnouncementRecipient, EntityId } from '@klassify/contracts';
 import type { AnnouncementSnapshot } from './announcementTypes';
 
 export interface AnnouncementRepository {

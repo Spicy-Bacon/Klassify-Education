@@ -19,7 +19,7 @@ import {
   type Student,
   type User,
   type YearGroup,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import type { IdentityRepository, IdentitySnapshot } from './identityRepository';
 import type {
   ClassInput,

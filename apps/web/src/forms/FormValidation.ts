@@ -5,7 +5,7 @@ import {
   type FormAnswer,
   type FormAnswerValue,
   type FormQuestion,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 
 const choiceQuestionTypes = new Set<FormQuestionType>([
   FormQuestionType.SingleChoice,

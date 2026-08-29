@@ -8,7 +8,7 @@ import { PermissionDenied } from '../components/PermissionDenied';
 import { StatusBadge } from '../components/StatusBadge';
 import { EnrollmentForm } from './EnrollmentForm';
 import { formatValue, stringField, studentName } from './pageUtils';
-import type { EntityId } from '@ai-school-platform/contracts';
+import type { EntityId } from '@klassify/contracts';
 import type { ActionPageProps, PageProps } from './pageTypes';
 import { useState } from 'react';
 import { filterStudents } from './listFilters';

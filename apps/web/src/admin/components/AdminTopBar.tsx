@@ -1,4 +1,4 @@
-import type { EntityId, User } from '@ai-school-platform/contracts';
+import type { EntityId, User } from '@klassify/contracts';
 import { DevelopmentIdentitySwitcher } from './DevelopmentIdentitySwitcher';
 import type { IdentityOption } from '../../identity/identityTypes';
 

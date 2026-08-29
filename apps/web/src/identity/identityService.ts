@@ -20,7 +20,7 @@ import {
   type StaffClassAssignment,
   type Student,
   type User,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import { IdentityAccessPolicy } from './IdentityAccessPolicy';
 import type { IdentityRepository, IdentitySnapshot } from './identityRepository';
 import type {

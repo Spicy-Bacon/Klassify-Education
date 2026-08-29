@@ -141,7 +141,7 @@ apps/web
 packages/contracts
 ```
 
-The web app consumes shared identity contracts through `@ai-school-platform/contracts` instead of source-relative imports into `packages/contracts`.
+The web app consumes shared identity contracts through `@klassify/contracts` instead of source-relative imports into `packages/contracts`.
 
 ## Deferred
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import type { EntityId } from '@ai-school-platform/contracts';
-import { AnnouncementStatus } from '@ai-school-platform/contracts';
+import type { EntityId } from '@klassify/contracts';
+import { AnnouncementStatus } from '@klassify/contracts';
 import { DevelopmentIdentitySwitcher } from '../admin/components/DevelopmentIdentitySwitcher';
 import { PermissionDenied } from '../admin/components/PermissionDenied';
 import { StatusBadge } from '../admin/components/StatusBadge';

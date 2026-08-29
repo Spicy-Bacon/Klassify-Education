@@ -7,7 +7,7 @@ import {
   type AuthenticatedUserContext,
   type FormDefinition,
   type FormQuestion,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import { DevelopmentIdentityRepository, developmentIdentityIds } from '../identity/developmentIdentityRepository';
 import { IdentityService } from '../identity/identityService';
 import { DevelopmentFormRepository, developmentFormIds } from './DevelopmentFormRepository';
