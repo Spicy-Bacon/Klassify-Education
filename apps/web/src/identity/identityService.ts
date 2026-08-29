@@ -106,11 +106,11 @@ export class IdentityService {
 
   getVisibleAdminSections(userContext: AuthenticatedUserContext): AdminSectionId[] {
     if (this.accessPolicy.canViewSchoolAdministration(userContext)) {
-      return ['overview', 'users', 'students', 'parents', 'staff', 'classes', 'announcements'];
+      return ['overview', 'users', 'students', 'parents', 'staff', 'classes', 'announcements', 'forms'];
     }
 
     if (userContext.role === Role.Teacher) {
-      return ['overview', 'students', 'classes', 'announcements'];
+      return ['overview', 'students', 'classes', 'announcements', 'forms'];
     }
 
     return [];

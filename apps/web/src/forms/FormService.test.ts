@@ -10,7 +10,7 @@ import {
 } from '@ai-school-platform/contracts';
 import { DevelopmentIdentityRepository, developmentIdentityIds } from '../identity/developmentIdentityRepository';
 import { IdentityService } from '../identity/identityService';
-import { DevelopmentFormRepository } from './DevelopmentFormRepository';
+import { DevelopmentFormRepository, developmentFormIds } from './DevelopmentFormRepository';
 import { FormService } from './FormService';
 
 const futureDeadline = '2099-09-12T15:00:00.000Z';
@@ -205,6 +205,31 @@ describe('FormService', () => {
     if (!result.ok) {
       expect(result.error.code).toBe(DomainErrorCode.ValidationError);
     }
+  });
+  it('lists all demo-school forms for a school administrator', () => {
+    const { service, context } = setup(developmentIdentityIds.admin);
+
+    expect(service.getVisibleForms(context).map((item) => item.form.id).sort()).toEqual([
+      developmentFormIds.emergencyContact,
+      developmentFormIds.museumTrip,
+      developmentFormIds.parentFeedback,
+    ].sort());
+  });
+
+  it('limits teacher form administration to authored or assigned-class forms', () => {
+    const { service, context } = setup(developmentIdentityIds.teacher3A);
+
+    expect(service.getVisibleForms(context).map((item) => item.form.id)).toEqual([
+      developmentFormIds.museumTrip,
+    ]);
+  });
+
+  it('does not expose admin form lists to parent or student roles', () => {
+    const parentSetup = setup(developmentIdentityIds.parentAmy);
+    const studentSetup = setup(developmentIdentityIds.studentChloeUser);
+
+    expect(parentSetup.service.getVisibleForms(parentSetup.context)).toEqual([]);
+    expect(studentSetup.service.getVisibleForms(studentSetup.context)).toEqual([]);
   });
 });
 

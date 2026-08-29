@@ -57,6 +57,7 @@ function AdminApplication() {
       identityOptions={identityApplication.identityOptions}
       identityService={identityApplication.identityService}
       announcementService={identityApplication.announcementService}
+      formService={identityApplication.formService}
       initialUserId={identityApplication.initialUserId}
     />
   );

@@ -4,14 +4,14 @@ Branch: feature/forms
 Phase: Phase 5 - Forms & Digital Reply Slips
 
 ## Current Milestone
-Milestone 2 - Admin Forms views
+Milestone 3 - Form builder
 
 ## Completed
 - [x] Branch `feature/forms` created from `develop` commit `9c38fd4`
 - [x] Milestone 1 - Forms domain and contracts
+- [x] Milestone 2 - Admin Forms views
 
 ## Remaining
-- [ ] Milestone 2 - Admin Forms views
 - [ ] Milestone 3 - Form builder
 - [ ] Milestone 4 - Publishing / responses / reminders
 - [ ] Milestone 5 - Android Parent Forms
@@ -20,8 +20,9 @@ Milestone 2 - Admin Forms views
 
 ## Last Successful Validation
 - `npm run lint --workspace apps/web` passed using temporary Node/npm.
-- `npm test --workspace apps/web -- FormService.test.ts` passed: 14 Forms tests.
-- `npm test --workspace apps/web` passed: 93 tests.
+- `npm test --workspace apps/web -- FormService.test.ts` passed: 17 Forms tests.
+- `npm test --workspace apps/web` passed: 96 tests.
+- `npm run build --workspace apps/web` passed.
 
 ## Known Issues
 - Local Android SDK availability is not yet verified for this branch.
@@ -32,7 +33,8 @@ Milestone 2 - Admin Forms views
 
 ### Web
 - TypeScript check passed.
-- Full Vitest suite passed: 93 tests.
+- Full Vitest suite passed: 96 tests.
+- Production build passed.
 
 ### Android
 - Not run yet for Phase 5.
@@ -44,7 +46,8 @@ Milestone 2 - Admin Forms views
 - Not run yet for Phase 5.
 
 ## Next Exact Action
-Implement Milestone 2 by wiring Forms into Admin navigation and adding list/detail/create/edit/responses route shells backed by `FormService`.
+Implement Milestone 3 by expanding the draft editor into a practical form builder with multiple question support, typed options and recipient preview.
 
 ## Commits
 - `dd84f43` `feat: add forms domain foundation`
+- Pending Milestone 2 commit.
