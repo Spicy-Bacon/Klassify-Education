@@ -4,15 +4,15 @@ Branch: feature/forms
 Phase: Phase 5 - Forms & Digital Reply Slips
 
 ## Current Milestone
-Milestone 3 - Form builder
+Milestone 4 - Publishing / responses / reminders
 
 ## Completed
 - [x] Branch `feature/forms` created from `develop` commit `9c38fd4`
 - [x] Milestone 1 - Forms domain and contracts
 - [x] Milestone 2 - Admin Forms views
+- [x] Milestone 3 - Form builder
 
 ## Remaining
-- [ ] Milestone 3 - Form builder
 - [ ] Milestone 4 - Publishing / responses / reminders
 - [ ] Milestone 5 - Android Parent Forms
 - [ ] Milestone 6 - iOS Parent Forms
@@ -46,8 +46,9 @@ Milestone 3 - Form builder
 - Not run yet for Phase 5.
 
 ## Next Exact Action
-Implement Milestone 3 by expanding the draft editor into a practical form builder with multiple question support, typed options and recipient preview.
+Implement Milestone 4 by tightening publish, response tracking and reminder workflows across the admin service and screens.
 
 ## Commits
 - `dd84f43` `feat: add forms domain foundation`
 - `aab757b` `feat: add forms administration routes`
+- Pending Milestone 3 commit.

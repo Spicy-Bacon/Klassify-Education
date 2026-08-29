@@ -1,7 +1,6 @@
-import { type FormEvent, useMemo, useState } from 'react';
+import { type Dispatch, type FormEvent, type SetStateAction, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  DomainErrorCode,
   FormAudienceType,
   FormQuestionType,
   FormStatus,
@@ -13,7 +12,7 @@ import {
   type User,
 } from '@ai-school-platform/contracts';
 import type { FormService } from '../../forms/FormService';
-import type { FormDetail } from '../../forms/formTypes';
+import type { FormDetail, FormRecipientResolution } from '../../forms/formTypes';
 import type { IdentityService } from '../../identity/identityService';
 import { EmptyState } from '../components/EmptyState';
 import { PageHeader } from '../components/PageHeader';
@@ -21,6 +20,14 @@ import { PermissionDenied } from '../components/PermissionDenied';
 import { StatusBadge } from '../components/StatusBadge';
 import { Table } from '../components/Table';
 import { formatValue } from './pageUtils';
+
+interface BuilderQuestion {
+  id: EntityId;
+  type: FormQuestionType;
+  label: string;
+  required: boolean;
+  optionsText: string;
+}
 
 export function FormsPage({ formService, userContext }: {
   formService: FormService;
@@ -257,15 +264,15 @@ export function FormEditorPage({
   const currentSchool = identityService.getCurrentSchool(userContext);
   const currentUser = identityService.getCurrentUser(userContext);
   const initialForm = existing?.ok ? existing.value.form : undefined;
+  const defaultAudience = defaultFormAudienceType(userContext.role);
   const [title, setTitle] = useState(initialForm?.title ?? '');
   const [description, setDescription] = useState(initialForm?.description ?? '');
   const [deadlineAt, setDeadlineAt] = useState(toDateTimeLocal(initialForm?.deadlineAt));
   const [requiresChildContext, setRequiresChildContext] = useState(initialForm?.requiresChildContext ?? true);
-  const [audienceType, setAudienceType] = useState<FormAudienceType>(initialForm?.audience[0]?.type ?? FormAudienceType.School);
+  const [audienceType, setAudienceType] = useState<FormAudienceType>(initialForm?.audience[0]?.type ?? defaultAudience);
   const [selectedTargetIds, setSelectedTargetIds] = useState<EntityId[]>(initialForm?.audience[0]?.targetIds ?? []);
-  const [questionLabel, setQuestionLabel] = useState(initialForm?.questions[0]?.label ?? '');
-  const [questionType, setQuestionType] = useState<FormQuestionType>(initialForm?.questions[0]?.type ?? FormQuestionType.Acknowledgement);
-  const [questionRequired, setQuestionRequired] = useState(initialForm?.questions[0]?.required ?? true);
+  const [questions, setQuestions] = useState<BuilderQuestion[]>(() => toBuilderQuestions(initialForm?.questions));
+  const [preview, setPreview] = useState<FormRecipientResolution | undefined>();
   const [localError, setLocalError] = useState<string | undefined>();
 
   if (existing && !existing.ok) {
@@ -285,7 +292,9 @@ export function FormEditorPage({
   }
 
   const audienceOptions = buildFormAudienceOptions(identityService, userContext, currentSchool.value.id, audienceType);
-  const questions = questionLabel.trim() ? [buildSingleQuestion(questionLabel, questionType, questionRequired)] : [];
+  const parsedQuestions = questions
+    .filter((question) => question.label.trim().length > 0)
+    .map((question, index) => buildQuestion(question, index));
   const input = {
     schoolId: currentSchool.value.id,
     title,
@@ -294,7 +303,7 @@ export function FormEditorPage({
     deadlineAt: deadlineAt ? new Date(deadlineAt).toISOString() : undefined,
     audience: selectedTargetIds.length > 0 ? [{ type: audienceType, targetIds: selectedTargetIds }] : [],
     requiresChildContext,
-    questions,
+    questions: parsedQuestions,
   };
 
   const submit = (event: FormEvent) => {
@@ -313,10 +322,22 @@ export function FormEditorPage({
     setLocalError(result.error.message);
   };
 
+  const refreshPreview = () => {
+    const result = formService.previewRecipients(userContext, input);
+    if (result.ok) {
+      setPreview(result.value);
+      setLocalError(undefined);
+      return;
+    }
+
+    setPreview(undefined);
+    setLocalError(result.error.message);
+  };
+
   return (
     <section className="panel">
       <PageHeader eyebrow="Form draft" title={formId ? 'Edit form' : 'Create form'}>
-        Build a simple development reply slip before the full builder is introduced.
+        Build a digital reply slip with audience targeting and typed questions.
       </PageHeader>
 
       {localError ? <p className="notice notice-error">{localError}</p> : null}
@@ -346,6 +367,7 @@ export function FormEditorPage({
               onChange={(event) => {
                 setAudienceType(event.target.value as FormAudienceType);
                 setSelectedTargetIds([]);
+                setPreview(undefined);
               }}
               value={audienceType}
             >
@@ -365,6 +387,7 @@ export function FormEditorPage({
                   checked={selectedTargetIds.includes(option.id)}
                   disabled={option.disabled}
                   onChange={(event) => {
+                    setPreview(undefined);
                     setSelectedTargetIds((current) => event.target.checked
                       ? [...current, option.id]
                       : current.filter((id) => id !== option.id));
@@ -377,24 +400,95 @@ export function FormEditorPage({
           </div>
         </section>
 
-        <section className="form-box" aria-labelledby="form-question-title">
-          <h3 id="form-question-title">First question</h3>
-          <label>
-            <span>Question</span>
-            <input onChange={(event) => setQuestionLabel(event.target.value)} type="text" value={questionLabel} />
-          </label>
-          <label>
-            <span>Question type</span>
-            <select onChange={(event) => setQuestionType(event.target.value as FormQuestionType)} value={questionType}>
-              {Object.values(FormQuestionType).map((type) => (
-                <option key={type} value={type}>{formatValue(type)}</option>
-              ))}
-            </select>
-          </label>
-          <label className="checkbox-label">
-            <input checked={questionRequired} onChange={(event) => setQuestionRequired(event.target.checked)} type="checkbox" />
-            Required
-          </label>
+        <section className="form-box" aria-labelledby="form-questions-title">
+          <h3 id="form-questions-title">Questions</h3>
+          {questions.map((question, index) => (
+            <div className="detail-box" key={question.id}>
+              <label>
+                <span>Question {index + 1}</span>
+                <input
+                  onChange={(event) => updateQuestion(setQuestions, question.id, { label: event.target.value })}
+                  required={index === 0}
+                  type="text"
+                  value={question.label}
+                />
+              </label>
+              <label>
+                <span>Question type</span>
+                <select
+                  onChange={(event) => {
+                    updateQuestion(setQuestions, question.id, { type: event.target.value as FormQuestionType });
+                    setPreview(undefined);
+                  }}
+                  value={question.type}
+                >
+                  {Object.values(FormQuestionType).map((type) => (
+                    <option key={type} value={type}>{formatValue(type)}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="checkbox-label">
+                <input
+                  checked={question.required}
+                  onChange={(event) => updateQuestion(setQuestions, question.id, { required: event.target.checked })}
+                  type="checkbox"
+                />
+                Required
+              </label>
+              {questionSupportsOptions(question.type) ? (
+                <label>
+                  <span>Options</span>
+                  <textarea
+                    onChange={(event) => updateQuestion(setQuestions, question.id, { optionsText: event.target.value })}
+                    rows={3}
+                    value={question.optionsText}
+                  />
+                </label>
+              ) : null}
+              <button
+                disabled={questions.length === 1}
+                onClick={() => {
+                  setQuestions((current) => current.filter((candidate) => candidate.id !== question.id));
+                  setPreview(undefined);
+                }}
+                type="button"
+              >
+                Remove question
+              </button>
+            </div>
+          ))}
+          <button
+            onClick={() => {
+              setQuestions((current) => [...current, createBuilderQuestion(current.length + 1)]);
+              setPreview(undefined);
+            }}
+            type="button"
+          >
+            Add question
+          </button>
+        </section>
+
+        <section className="form-box" aria-labelledby="form-preview-title">
+          <h3 id="form-preview-title">Recipients</h3>
+          {preview ? (
+            <dl className="detail-list">
+              <div>
+                <dt>Parent / guardian users</dt>
+                <dd>{preview.parentGuardianCount}</dd>
+              </div>
+              <div>
+                <dt>Student contexts</dt>
+                <dd>{preview.studentCount}</dd>
+              </div>
+              <div>
+                <dt>Total tasks</dt>
+                <dd>{preview.taskCount}</dd>
+              </div>
+            </dl>
+          ) : (
+            <p className="subtle-note">Preview recipients before publishing.</p>
+          )}
+          <button onClick={refreshPreview} type="button">Preview recipients</button>
         </section>
 
         <div className="form-actions">
@@ -461,25 +555,73 @@ function buildFormAudienceOptions(
   }));
 }
 
-function buildSingleQuestion(label: string, type: FormQuestionType, required: boolean): FormQuestion {
+function toBuilderQuestions(questions?: FormQuestion[]): BuilderQuestion[] {
+  if (!questions || questions.length === 0) {
+    return [createBuilderQuestion(1)];
+  }
+
+  return questions.map((question, index) => ({
+    id: question.id || `question_development_${index + 1}`,
+    type: question.type,
+    label: question.label,
+    required: question.required,
+    optionsText: question.options?.map((option) => option.label).join('\n') ?? '',
+  }));
+}
+
+function createBuilderQuestion(index: number): BuilderQuestion {
+  return {
+    id: `question_development_${index}`,
+    type: FormQuestionType.Acknowledgement,
+    label: '',
+    required: true,
+    optionsText: 'Yes\nNo',
+  };
+}
+
+function updateQuestion(
+  setQuestions: Dispatch<SetStateAction<BuilderQuestion[]>>,
+  id: EntityId,
+  patch: Partial<BuilderQuestion>,
+) {
+  setQuestions((current) => current.map((question) => (question.id === id ? { ...question, ...patch } : question)));
+}
+
+function buildQuestion(question: BuilderQuestion, index: number): FormQuestion {
+  const id = question.id || `question_development_${index + 1}`;
   const base = {
-    id: 'question_development_1',
-    type,
-    label: label.trim(),
-    required,
+    id,
+    type: question.type,
+    label: question.label.trim(),
+    required: question.required,
   };
 
-  if ([FormQuestionType.SingleChoice, FormQuestionType.MultipleChoice].includes(type)) {
+  if (questionSupportsOptions(question.type)) {
     return {
       ...base,
-      options: [
-        { id: 'option_yes', label: 'Yes' },
-        { id: 'option_no', label: 'No' },
-      ],
+      options: optionLabels(question.optionsText).map((label, optionIndex) => ({
+        id: `${id}_option_${optionIndex + 1}`,
+        label,
+      })),
     };
   }
 
   return base;
+}
+
+function questionSupportsOptions(type: FormQuestionType) {
+  return [FormQuestionType.SingleChoice, FormQuestionType.MultipleChoice].includes(type);
+}
+
+function optionLabels(optionsText: string) {
+  return optionsText
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+}
+
+function defaultFormAudienceType(role: Role): FormAudienceType {
+  return role === Role.Teacher ? FormAudienceType.Class : FormAudienceType.School;
 }
 
 function formatResponseSummary(summary: { delivered: number; submitted: number; completionRate: number }) {
@@ -518,8 +660,4 @@ function studentLabel(identityService: IdentityService, userContext: Authenticat
   }
 
   return `${student.value.student.preferredName ?? student.value.student.firstName} ${student.value.student.lastName}`;
-}
-
-export function formRouteError(message: string): DomainResult<never> {
-  return { ok: false, error: { code: DomainErrorCode.ValidationError, message } };
 }
