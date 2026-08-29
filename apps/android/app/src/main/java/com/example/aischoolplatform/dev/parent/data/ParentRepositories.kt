@@ -2,6 +2,8 @@ package com.example.aischoolplatform.dev.parent.data
 
 import com.example.aischoolplatform.dev.parent.model.ChildSummary
 import com.example.aischoolplatform.dev.parent.model.ParentAnnouncement
+import com.example.aischoolplatform.dev.parent.model.ParentFormAnswer
+import com.example.aischoolplatform.dev.parent.model.ParentFormTask
 import com.example.aischoolplatform.dev.parent.model.ParentProfile
 import com.example.aischoolplatform.dev.parent.model.ParentSession
 import com.example.aischoolplatform.dev.parent.model.SchoolSummary
@@ -18,4 +20,10 @@ interface AnnouncementRepository {
     fun publishedAnnouncements(session: ParentSession): List<ParentAnnouncement>
     fun announcement(session: ParentSession, announcementId: String): ParentAnnouncement?
     fun markRead(session: ParentSession, announcementId: String, readAt: String): ParentAnnouncement?
+}
+
+interface FormRepository {
+    fun formTasks(session: ParentSession): List<ParentFormTask>
+    fun formTask(session: ParentSession, recipientId: String): ParentFormTask?
+    fun submitForm(session: ParentSession, recipientId: String, answers: List<ParentFormAnswer>, submittedAt: String): ParentFormTask?
 }

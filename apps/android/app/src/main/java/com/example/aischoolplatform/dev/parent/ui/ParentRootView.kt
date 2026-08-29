@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.ChildCare
+import androidx.compose.material.icons.filled.FactCheck
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -27,6 +28,8 @@ import com.example.aischoolplatform.dev.parent.ui.announcements.AnnouncementDeta
 import com.example.aischoolplatform.dev.parent.ui.announcements.AnnouncementsScreen
 import com.example.aischoolplatform.dev.parent.ui.children.ChildDetailScreen
 import com.example.aischoolplatform.dev.parent.ui.children.ChildrenScreen
+import com.example.aischoolplatform.dev.parent.ui.forms.FormDetailScreen
+import com.example.aischoolplatform.dev.parent.ui.forms.FormsScreen
 import com.example.aischoolplatform.dev.parent.ui.home.ParentHomeScreen
 import com.example.aischoolplatform.dev.parent.ui.settings.SettingsScreen
 
@@ -48,6 +51,12 @@ fun ParentRootView(service: ParentAppService, session: ParentSession) {
                     onClick = { navigationState = navigationState.selectTab(ParentTab.Announcements) },
                     icon = { Icon(Icons.Filled.Campaign, contentDescription = stringResource(R.string.tab_announcements)) },
                     label = { Text(stringResource(R.string.tab_announcements)) }
+                )
+                NavigationBarItem(
+                    selected = navigationState.selectedTab == ParentTab.Forms,
+                    onClick = { navigationState = navigationState.selectTab(ParentTab.Forms) },
+                    icon = { Icon(Icons.Filled.FactCheck, contentDescription = stringResource(R.string.tab_forms)) },
+                    label = { Text(stringResource(R.string.tab_forms)) }
                 )
                 NavigationBarItem(
                     selected = navigationState.selectedTab == ParentTab.Children,
@@ -72,6 +81,13 @@ fun ParentRootView(service: ParentAppService, session: ParentSession) {
                 announcementId = navigationState.openedAnnouncementId!!,
                 onBack = { navigationState = navigationState.closeAnnouncement() }
             )
+            navigationState.openedFormRecipientId != null -> FormDetailScreen(
+                service = service,
+                session = session,
+                recipientId = navigationState.openedFormRecipientId!!,
+                onBack = { navigationState = navigationState.closeForm() },
+                modifier = modifier
+            )
             navigationState.openedChildDetailId != null && navigationState.selectedTab == ParentTab.Children -> ChildDetailScreen(
                 service = service,
                 session = session,
@@ -86,12 +102,20 @@ fun ParentRootView(service: ParentAppService, session: ParentSession) {
                 onSelectChild = { navigationState = navigationState.selectContextChild(it) },
                 onOpenAnnouncements = { navigationState = navigationState.selectTab(ParentTab.Announcements) },
                 onOpenAnnouncement = { navigationState = navigationState.openAnnouncement(it) },
+                onOpenForms = { navigationState = navigationState.selectTab(ParentTab.Forms) },
+                onOpenForm = { navigationState = navigationState.openForm(it) },
                 modifier = modifier
             )
             navigationState.selectedTab == ParentTab.Announcements -> AnnouncementsScreen(
                 service = service,
                 session = session,
                 onOpenAnnouncement = { navigationState = navigationState.openAnnouncement(it) },
+                modifier = modifier
+            )
+            navigationState.selectedTab == ParentTab.Forms -> FormsScreen(
+                service = service,
+                session = session,
+                onOpenForm = { navigationState = navigationState.openForm(it) },
                 modifier = modifier
             )
             navigationState.selectedTab == ParentTab.Children -> ChildrenScreen(

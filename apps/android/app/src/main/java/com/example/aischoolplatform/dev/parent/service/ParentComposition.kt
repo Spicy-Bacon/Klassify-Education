@@ -8,6 +8,6 @@ object DevelopmentParentComposition {
     fun createService(context: Context): ParentAppService {
         val repository = DevelopmentParentRepository()
         val preferences = SharedPreferencesAppPreferenceRepository(context)
-        return ParentAppService(repository, repository, preferences)
+        return ParentAppService(repository, repository, repository, preferences)
     }
 }

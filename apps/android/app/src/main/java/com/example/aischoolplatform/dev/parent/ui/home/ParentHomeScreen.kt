@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import com.example.aischoolplatform.dev.R
 import com.example.aischoolplatform.dev.parent.model.ChildSummary
 import com.example.aischoolplatform.dev.parent.model.ParentAnnouncement
+import com.example.aischoolplatform.dev.parent.model.ParentFormStatus
+import com.example.aischoolplatform.dev.parent.model.ParentFormTask
 import com.example.aischoolplatform.dev.parent.model.ParentSession
 import com.example.aischoolplatform.dev.parent.service.ParentAppResult
 import com.example.aischoolplatform.dev.parent.service.ParentAppService
@@ -38,6 +39,8 @@ fun ParentHomeScreen(
     onSelectChild: (String) -> Unit,
     onOpenAnnouncements: () -> Unit,
     onOpenAnnouncement: (String) -> Unit,
+    onOpenForms: () -> Unit,
+    onOpenForm: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     when (val result = service.homeState(session, selectedChildId)) {
@@ -59,7 +62,10 @@ fun ParentHomeScreen(
                 )
             }
             item {
-                SummaryCard(title = stringResource(R.string.home_unread_announcements), value = result.value.unreadCount.toString())
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SummaryCard(title = stringResource(R.string.home_unread_announcements), value = result.value.unreadCount.toString(), modifier = Modifier.weight(1f))
+                    SummaryCard(title = stringResource(R.string.home_outstanding_forms), value = result.value.outstandingFormCount.toString(), modifier = Modifier.weight(1f))
+                }
             }
             item {
                 SectionHeader(stringResource(R.string.home_latest_announcements), actionLabel = stringResource(R.string.home_view_all), onAction = onOpenAnnouncements)
@@ -68,18 +74,16 @@ fun ParentHomeScreen(
                 AnnouncementPreviewRow(announcement = announcement, onOpen = { onOpenAnnouncement(announcement.id) })
             }
             item {
+                SectionHeader(stringResource(R.string.home_forms), actionLabel = stringResource(R.string.home_view_all), onAction = onOpenForms)
+            }
+            items(result.value.forms.filter { it.status == ParentFormStatus.Outstanding }.take(3)) { form ->
+                FormPreviewRow(form = form, onOpen = { onOpenForm(form.recipientId) })
+            }
+            item {
                 SectionHeader(stringResource(R.string.home_my_children))
             }
             items(result.value.children) { child ->
                 Text("${child.displayName} - ${child.className}", style = MaterialTheme.typography.bodyLarge)
-            }
-            item {
-                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-                    Column(Modifier.fillMaxWidth().padding(16.dp)) {
-                        Text(stringResource(R.string.home_action_required), style = MaterialTheme.typography.titleMedium)
-                        Text(stringResource(R.string.home_forms_coming_soon), style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
             }
         }
     }
@@ -101,8 +105,8 @@ private fun ChildSwitcher(children: List<ChildSummary>, selectedChild: ChildSumm
 }
 
 @Composable
-private fun SummaryCard(title: String, value: String) {
-    Card {
+private fun SummaryCard(title: String, value: String, modifier: Modifier = Modifier) {
+    Card(modifier = modifier) {
         Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             Text(value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
@@ -128,6 +132,18 @@ private fun AnnouncementPreviewRow(announcement: ParentAnnouncement, onOpen: () 
             Spacer(Modifier.height(4.dp))
             Text(announcement.audienceLabel, style = MaterialTheme.typography.bodySmall)
             Text(if (announcement.readAt == null) "Unread" else "Read", style = MaterialTheme.typography.labelMedium)
+        }
+    }
+}
+
+@Composable
+private fun FormPreviewRow(form: ParentFormTask, onOpen: () -> Unit) {
+    Card(onClick = onOpen) {
+        Column(Modifier.fillMaxWidth().padding(16.dp)) {
+            Text(form.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(4.dp))
+            Text(form.child?.let { "${it.displayName} - ${it.className}" } ?: "Family-level form", style = MaterialTheme.typography.bodySmall)
+            Text(form.deadlineAt?.let { "Due $it" } ?: "No deadline", style = MaterialTheme.typography.labelMedium)
         }
     }
 }
