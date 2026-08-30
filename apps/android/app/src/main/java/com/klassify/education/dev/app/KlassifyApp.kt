@@ -12,8 +12,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.klassify.education.dev.R
 import com.klassify.education.dev.parent.service.DevelopmentParentComposition
 import com.klassify.education.dev.parent.ui.ParentRootView
 
@@ -44,7 +46,7 @@ private fun AuthNotConfiguredScreen() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Klassify Education", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Text("Authentication is not configured.", style = MaterialTheme.typography.bodyLarge)
     }
 }

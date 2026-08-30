@@ -1,6 +1,6 @@
 # Parent App Architecture
 
-Phase 4 introduces the first native parent/guardian experience for Klassify Education. This is a parent experience module inside the existing mobile foundations, not a final decision to ship a separate permanent Parent App binary.
+Phase 4 introduces the first native parent/guardian experience for Klassify. This is a parent experience module inside the existing mobile foundations, not a final decision to ship a separate permanent Parent App binary.
 
 ## Product Purpose
 

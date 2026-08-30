@@ -19,7 +19,7 @@ export function AdminTopBar({
     <header className="admin-topbar">
       <div>
         <p className="status">Development Build</p>
-        <h1>Klassify Education</h1>
+        <h1>Klassify</h1>
       </div>
       <DevelopmentIdentitySwitcher
         allowIdentitySwitching={allowIdentitySwitching}

@@ -111,6 +111,9 @@ The screenshot-loop frontend redesign is a separate milestone. Do not implement 
 
 When that milestone is active:
 
+- Start with the primary desktop viewport at `1440x1000`.
+- Use `1280x800` as the secondary desktop viewport, `768x1024` for tablet, and `390x844` for mobile.
+- Complete the primary viewport iteration first, then check the responsive targets later in the same milestone.
 - Work on one visual target at a time.
 - Use deterministic, fixed-size screenshots so iterations are comparable.
 - Capture the current state before changing it.

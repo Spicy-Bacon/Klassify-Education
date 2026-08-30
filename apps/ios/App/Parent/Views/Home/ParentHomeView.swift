@@ -11,7 +11,7 @@ struct ParentHomeView: View {
                 List {
                     Section {
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("Klassify Education")
+                            Text("app_name")
                                 .font(.title2.bold())
                             Text("DEVELOPMENT ONLY parent session")
                                 .font(.caption.bold())

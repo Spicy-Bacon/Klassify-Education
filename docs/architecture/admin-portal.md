@@ -1,6 +1,6 @@
 # Admin Portal Architecture
 
-Phase 2 established the first extensible Klassify Education school administration workspace. Phase 3 extends it with Announcements while still deferring forms, attendance, messaging, media, AI, production authentication and production persistence.
+Phase 2 established the first extensible Klassify school administration workspace. Phase 3 extends it with Announcements while still deferring forms, attendance, messaging, media, AI, production authentication and production persistence.
 
 ## Purpose
 
