@@ -1,10 +1,10 @@
-#include "school_platform/core/version.hpp"
+#include "klassify/core/version.hpp"
 
-namespace school_platform::core {
+namespace klassify::core {
 
 std::string version()
 {
     return "0.1.0-dev";
 }
 
-} // namespace school_platform::core
+} // namespace klassify::core

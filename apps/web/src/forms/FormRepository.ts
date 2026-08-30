@@ -1,4 +1,4 @@
-import type { EntityId, FormDefinition, FormRecipient, FormSubmission } from '@ai-school-platform/contracts';
+import type { EntityId, FormDefinition, FormRecipient, FormSubmission } from '@klassify/contracts';
 import type { FormSnapshot } from './formTypes';
 
 export interface FormRepository {

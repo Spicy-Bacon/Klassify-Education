@@ -10,7 +10,7 @@ import {
   type EntityId,
   type FormQuestion,
   type User,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import type { FormService } from '../../forms/FormService';
 import type { FormRecipientResolution } from '../../forms/formTypes';
 import type { IdentityService } from '../../identity/identityService';

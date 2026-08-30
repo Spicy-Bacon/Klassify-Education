@@ -19,7 +19,7 @@ struct KlassifyRootView: View {
 struct AuthenticationNotConfiguredView: View {
     var body: some View {
         VStack(spacing: 12) {
-            Text("Klassify Education")
+            Text("app_name")
                 .font(.title.bold())
             Text("Authentication is not configured.")
                 .foregroundStyle(.secondary)

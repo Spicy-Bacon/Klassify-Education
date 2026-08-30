@@ -1,4 +1,4 @@
-import type { User } from '@ai-school-platform/contracts';
+import type { User } from '@klassify/contracts';
 import type { ClassSummary, GuardianSummary, StaffSummary, StudentSummary } from '../../identity/identityTypes';
 import { studentName } from './pageUtils';
 

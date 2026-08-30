@@ -1,6 +1,6 @@
 # Announcements Architecture
 
-Phase 3 introduces the first end-to-end Connect workflow for Klassify Education: targeted school announcements with drafting, publication, scheduling state and readership tracking.
+Phase 3 introduces the first end-to-end Connect workflow for Klassify: targeted school announcements with drafting, publication, scheduling state and readership tracking.
 
 ## Domain
 

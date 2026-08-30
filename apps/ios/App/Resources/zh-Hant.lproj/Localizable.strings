@@ -18,6 +18,7 @@
 "settings_version" = "版本";
 "settings_development_build" = "開發版本";
 "language_english" = "English";
+"app_name" = "Klassify";
 "language_traditional_chinese" = "繁體中文";
 "empty_announcements" = "暫時沒有消息。";
 "empty_children" = "找不到已連結的子女。";

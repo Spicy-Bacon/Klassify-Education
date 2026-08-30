@@ -6,7 +6,7 @@ import {
   StudentStatus,
   type EntityId,
   type FormAudience,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import type { IdentitySnapshot } from '../identity/identityRepository';
 import type { FormRecipientResolution, ResolvedFormRecipient } from './formTypes';
 

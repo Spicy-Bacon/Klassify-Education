@@ -1,4 +1,4 @@
-#include "school_platform/core/version.hpp"
+#include "klassify/core/version.hpp"
 
 #include <QApplication>
 #include <QLabel>
@@ -10,13 +10,13 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
 
     QWidget window;
-    window.setWindowTitle("AI School Platform");
+    window.setWindowTitle("Klassify");
 
     auto* layout = new QVBoxLayout(&window);
-    auto* title = new QLabel("AI School Platform");
+    auto* title = new QLabel("Klassify");
     auto* status = new QLabel("Development Build");
     auto* coreVersion = new QLabel(
-        QString("Core %1").arg(QString::fromStdString(school_platform::core::version())));
+        QString("Core %1").arg(QString::fromStdString(klassify::core::version())));
 
     title->setAlignment(Qt::AlignCenter);
     status->setAlignment(Qt::AlignCenter);

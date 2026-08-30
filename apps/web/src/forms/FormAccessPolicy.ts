@@ -10,7 +10,7 @@ import {
   type FormAudience,
   type FormDefinition,
   type FormRecipient,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import { isGuardianLinkedToStudent, isTeacherAssignedToClass } from '../identity/IdentityAccessPolicy';
 import type { IdentitySnapshot } from '../identity/identityRepository';
 import type { IdentityService } from '../identity/identityService';

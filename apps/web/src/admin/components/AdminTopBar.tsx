@@ -1,4 +1,4 @@
-import type { EntityId, User } from '@ai-school-platform/contracts';
+import type { EntityId, User } from '@klassify/contracts';
 import { DevelopmentIdentitySwitcher } from './DevelopmentIdentitySwitcher';
 import type { IdentityOption } from '../../identity/identityTypes';
 
@@ -19,7 +19,7 @@ export function AdminTopBar({
     <header className="admin-topbar">
       <div>
         <p className="status">Development Build</p>
-        <h1>Klassify Education</h1>
+        <h1>Klassify</h1>
       </div>
       <DevelopmentIdentitySwitcher
         allowIdentitySwitching={allowIdentitySwitching}

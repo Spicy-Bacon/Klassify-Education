@@ -1,25 +1,25 @@
-add_library(SchoolPlatformCore
+add_library(KlassifyCore
   src/version.cpp
 )
 
-add_library(AISchoolPlatform::Core ALIAS SchoolPlatformCore)
+add_library(KlassifyEducation::Core ALIAS KlassifyCore)
 
-target_include_directories(SchoolPlatformCore
+target_include_directories(KlassifyCore
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_compile_features(SchoolPlatformCore PUBLIC cxx_std_20)
+target_compile_features(KlassifyCore PUBLIC cxx_std_20)
 
 if(BUILD_TESTING)
-  add_executable(SchoolPlatformCoreTests
+  add_executable(KlassifyCoreTests
     tests/version_test.cpp
   )
 
-  target_link_libraries(SchoolPlatformCoreTests
+  target_link_libraries(KlassifyCoreTests
     PRIVATE
-      AISchoolPlatform::Core
+      KlassifyEducation::Core
   )
 
-  add_test(NAME SchoolPlatformCoreTests COMMAND SchoolPlatformCoreTests)
+  add_test(NAME KlassifyCoreTests COMMAND KlassifyCoreTests)
 endif()

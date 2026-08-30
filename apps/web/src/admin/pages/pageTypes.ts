@@ -1,4 +1,4 @@
-import type { AuthenticatedUserContext, DomainResult } from '@ai-school-platform/contracts';
+import type { AuthenticatedUserContext, DomainResult } from '@klassify/contracts';
 import type { IdentityService } from '../../identity/identityService';
 
 export interface PageProps {

@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { useMemo, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import type { AuthenticatedUserContext, DomainResult, EntityId, User } from '@ai-school-platform/contracts';
+import type { AuthenticatedUserContext, DomainResult, EntityId, User } from '@klassify/contracts';
 import { AdminLayout } from './AdminLayout';
 import { PermissionDenied } from './components/PermissionDenied';
 import { adminRoutes } from './routes';

@@ -10,7 +10,7 @@ import type {
   Student,
   User,
   YearGroup,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import type {
   ClassInput,
   EnrollmentInput,

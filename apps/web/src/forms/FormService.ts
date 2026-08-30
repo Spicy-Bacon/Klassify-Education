@@ -10,7 +10,7 @@ import {
   type FormDefinition,
   type FormRecipient,
   type FormSubmission,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import type { IdentitySnapshot } from '../identity/identityRepository';
 import type { IdentityService } from '../identity/identityService';
 import { isDefined } from '../identity/identityService';

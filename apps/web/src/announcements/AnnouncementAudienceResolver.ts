@@ -8,7 +8,7 @@ import {
   type AnnouncementAudience,
   type EntityId,
   type User,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import type { IdentitySnapshot } from '../identity/identityRepository';
 import type { RecipientResolution, ResolvedAnnouncementRecipient } from './announcementTypes';
 

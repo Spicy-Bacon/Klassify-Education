@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.aischoolplatform.dev"
+    namespace = "com.klassify.education.dev"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.aischoolplatform.dev"
+        applicationId = "com.klassify.education.dev"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

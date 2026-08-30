@@ -9,7 +9,7 @@ import {
   type AuthenticatedUserContext,
   type DomainResult,
   type EntityId,
-} from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
 import type { AnnouncementService } from '../../announcements/AnnouncementService';
 import { recipientGroupLabel } from '../../announcements/AnnouncementService';
 import type { RecipientResolution } from '../../announcements/announcementTypes';

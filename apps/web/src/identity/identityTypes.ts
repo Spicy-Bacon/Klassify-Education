@@ -8,8 +8,8 @@ import type {
   Student,
   User,
   YearGroup,
-} from '@ai-school-platform/contracts';
-import { Role, StaffClassAssignmentType } from '@ai-school-platform/contracts';
+} from '@klassify/contracts';
+import { Role, StaffClassAssignmentType } from '@klassify/contracts';
 import type { AnnouncementService } from '../announcements/AnnouncementService';
 import type { FormService } from '../forms/FormService';
 import type { IdentityService } from './identityService';
