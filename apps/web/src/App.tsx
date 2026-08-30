@@ -22,7 +22,7 @@ export function App() {
     <main className="app-shell">
       <section className="intro" aria-labelledby="app-title">
         <p className="status">Development Build</p>
-        <h1 id="app-title">Klassify Education</h1>
+        <h1 id="app-title">Klassify</h1>
         <div className="pillars" aria-label="Product pillars">
           {pillars.map((pillar) => (
             <span key={pillar}>{pillar}</span>

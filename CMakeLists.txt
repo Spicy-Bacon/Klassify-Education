@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 project(
   KlassifyEducation
   VERSION 0.1.0
-  DESCRIPTION "Foundation for the Klassify Education client ecosystem"
+  DESCRIPTION "Foundation for the Klassify client ecosystem"
   LANGUAGES CXX
 )
 

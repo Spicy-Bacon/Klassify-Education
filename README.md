@@ -1,6 +1,6 @@
-# Klassify Education
+# Klassify
 
-Klassify Education is a modular school operations, communication, AI and media ecosystem.
+Klassify is a modular school operations, communication, AI and media ecosystem.
 
 Development status: **Pre-MVP / Foundation Stage**
 
