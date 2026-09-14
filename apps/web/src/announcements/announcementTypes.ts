@@ -77,4 +77,3 @@ export interface AnnouncementFilter {
 export interface ScheduleAnnouncementInput {
   scheduledFor: ISODateTime;
 }
-

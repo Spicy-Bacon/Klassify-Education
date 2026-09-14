@@ -488,5 +488,3 @@ function buildAudienceOptions(
     disabled: userContext.role === Role.Teacher,
   }));
 }
-
-
