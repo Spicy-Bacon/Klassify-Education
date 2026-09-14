@@ -1,6 +1,9 @@
 # Admin Portal Architecture
 
-Phase 2 established the first extensible Klassify school administration workspace. Phase 3 extends it with Announcements while still deferring forms, attendance, messaging, media, AI, production authentication and production persistence.
+Phase 2 established the Klassify school administration workspace. Phases 3
+and 5 added Announcements and Forms as development foundations. Attendance,
+messaging, web media administration, AI and production infrastructure remain
+backlog; see the [roadmap](../product/mvp-roadmap.md).
 
 ## Purpose
 
@@ -52,12 +55,13 @@ Current functional routes:
 /admin/announcements/:announcementId
 /admin/announcements/new
 /admin/announcements/:announcementId/edit
+/admin/forms
 ```
 
 Future route extension points are listed but disabled for:
 
 ```text
-Forms
+Messaging
 Attendance
 Events
 Media
@@ -101,6 +105,8 @@ Admin UI components must not read unrestricted repository snapshots. Explicit pe
 - Parents / guardians list and linked-child detail route.
 - Staff list and basic staff creation form.
 - Classes list, filters and class detail route.
+- Announcements and Forms development workflows; reminder requests are recorded
+  but do not deliver notifications.
 
 Creation workflows remain development/prototype quality and are backed by the in-memory development identity repository through the service interface.
 
@@ -129,7 +135,6 @@ The following remain intentionally undecided or unimplemented:
 - Deployment platform.
 - Object storage.
 - AI model provider.
-- Forms.
 - Attendance.
 - Events.
 - Messaging.

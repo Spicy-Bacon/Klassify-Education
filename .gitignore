@@ -46,16 +46,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# C++ / CMake
-CMakeCache.txt
-CMakeFiles/
-cmake-build-*/
-build-*/
-out/
-Testing/
-CTestTestfile.cmake
-compile_commands.json
-install_manifest.txt
+# Compiled artifacts (including native mobile dependencies)
 *.o
 *.obj
 *.a
@@ -65,25 +56,6 @@ install_manifest.txt
 *.dll
 *.exe
 *.pdb
-
-# Qt
-*.pro.user
-*.qbs.user
-moc_*.cpp
-qrc_*.cpp
-ui_*.h
-
-# Visual Studio
-.vs/
-*.suo
-*.user
-*.vcxproj.user
-*.opensdf
-*.sdf
-*.ipch
-x64/
-x86/
-Win32/
 
 # VS Code local state
 .vscode/*

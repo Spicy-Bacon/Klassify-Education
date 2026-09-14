@@ -4,7 +4,11 @@ Klassify is a modular school operations, communication, AI and media ecosystem.
 
 Development status: **Pre-MVP / Foundation Stage**
 
-Current active product area: **Frontend Foundation / Design System**
+Current milestone: **Product Surface Simplification / Documentation Alignment**
+
+Upcoming product milestone: **Frontend Foundation / Design System** (not started).
+
+The first merge into `main` will be a foundation checkpoint, not a completed MVP.
 
 ## Product
 
@@ -20,21 +24,39 @@ School administration and teacher workflow, including attendance, leave, events,
 
 ### Capture
 
-Photography, private media and future high-performance media services, including private galleries, media management and future video or live-media workflows.
+Photography, web-based media upload, private galleries, event organisation,
+consent and selections. Video and live-media functionality remain deferred.
+
+The commercial entry strategy uses existing photography relationships to
+introduce media and Connect to schools. Business validation is tracked
+separately from engineering completion.
+
+## Product Surfaces
+
+Admin Web serves school administration; native Staff Mobile and Parent Mobile
+serve daily workflows, communication and tasks. Student Mobile or responsive
+web will follow pilot priorities. Media administration starts on web.
+Separate mobile apps versus one role-aware app remains undecided.
+
+Desktop is deferred until evidence supports high-volume ingest, offline queues,
+camera/Lightroom integration, intensive local processing or live-event needs.
+C++ is an optional future tool for measured performance workloads, not the
+default engine or backend language. See [ADR 0001](docs/architecture/decisions/0001-web-mobile-product-surfaces.md).
 
 ## Applications
 
 | Path | Purpose |
 | --- | --- |
 | `apps/web` | React and TypeScript web foundation for administration and rapid iteration. |
-| `apps/desktop` | C++ and Qt desktop foundation for media-heavy operator workflows. |
 | `apps/android` | Kotlin Android foundation for future staff, parent and student experiences. |
 | `apps/ios` | Swift iOS foundation and documented project structure. |
-| `core` | Shared C++20 client core for performance-sensitive cross-platform logic. |
 | `services` | Placeholder for backend decisions that are intentionally open. |
 | `packages/contracts` | Platform-neutral contracts and shared concepts. |
 
 ## Completed Foundations
+
+These are development implementations using fictional data and replaceable
+repositories, not production-ready services.
 
 - Identity and School Structure.
 - Admin Portal Core.
@@ -72,29 +94,30 @@ Open pull requests into `develop`. Do not merge feature branches directly into `
 
 ## Current Scope
 
-This repository currently provides the platform foundation, identity and school structure, the Admin Portal core, announcements, Parent App V1 and Forms / Digital Reply Slips. It does not implement production business logic, payments, grading, LMS functionality, admissions, livestreaming, facial recognition, advanced video generation or cross-school analytics.
+This repository provides identity and school structure, the Admin Portal core,
+announcements, Parent App V1 and Forms / Digital Reply Slips as development
+foundations. A form consent checkbox is not a complete Media Consent Centre;
+recording a reminder request does not deliver a notification. Future media
+selection/ordering does not authorise payment processing.
+
+Payments, grading, full LMS functionality, admissions, livestreaming, facial
+recognition, advanced video generation and cross-school analytics are deferred.
 
 Backend provider, database, API framework, authentication, object storage, AI provider, deployment platform and service topology decisions are intentionally deferred.
 
 ## Build Quick Start
 
-### C++ Core
-
-```bash
-cmake -S . -B build
-cmake --build build
-ctest --test-dir build --output-on-failure
-```
-
-The desktop target is configured only when Qt Widgets is available.
-
 ### Web
 
+Use Node 22.12+ on the 22.x line or another version satisfying the locked
+package engines. Install the existing lockfile without upgrading dependencies.
+
 ```bash
-npm install
+npm ci
 npm run lint --workspace apps/web
 npm test --workspace apps/web
 npm run build --workspace apps/web
+npm audit --omit=dev --audit-level=high
 ```
 
 ### Android
@@ -104,6 +127,11 @@ Open `apps/android` with Android Studio or run a Gradle build from that director
 ### iOS
 
 See `apps/ios/README.md`. A full Xcode project is intentionally deferred until the app identifier, signing and project generation approach are confirmed.
+
+See [validation](docs/development/validation.md) for native commands and CI,
+the [product source summary](docs/product/product-definition.md) for externally
+maintained confidential sources, and the [roadmap](docs/product/mvp-roadmap.md)
+for pilot areas, production gates and business validation.
 
 ## Parent App V1
 

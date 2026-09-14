@@ -1,5 +1,11 @@
 # Klassify Foundation Cleanup Progress
 
+Historical milestone record: validation, limitations and next actions below
+describe that milestone at the time. Desktop/C++ scaffolding was subsequently
+removed under [ADR 0001](../architecture/decisions/0001-web-mobile-product-surfaces.md).
+Use the [current validation guide](validation.md) and [roadmap](../product/mvp-roadmap.md)
+for present work.
+
 Feature branch: `feature/klassify-foundation-cleanup`
 Merged by: pull request 6
 Squash-merge commit: `b48d6ac765b2e60cfa221fd42e60388731677b89`

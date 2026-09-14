@@ -1,5 +1,11 @@
 # Forms Development Progress
 
+Historical milestone record: validation, limitations and next actions below
+describe that milestone at the time. Desktop/C++ scaffolding was subsequently
+removed under [ADR 0001](../architecture/decisions/0001-web-mobile-product-surfaces.md).
+Use the [current validation guide](validation.md) and [roadmap](../product/mvp-roadmap.md)
+for present work.
+
 Branch: feature/forms
 Phase: Phase 5 - Forms & Digital Reply Slips
 
