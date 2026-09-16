@@ -7,7 +7,7 @@ A generated Xcode project is intentionally deferred until the final app identifi
 Current scope:
 
 - SwiftUI app entry point.
-- Parent experience module inside the role-aware mobile foundation.
+- Parent experience module inside the native mobile foundation; final role packaging is open.
 - Development-only parent session using fictional Demo School data.
 - Parent Home with unread announcement count, outstanding form count, latest notices, forms and linked children.
 - Announcements list and detail with read/unread state through a service boundary.

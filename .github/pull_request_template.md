@@ -5,9 +5,8 @@
 - [ ] Connect
 - [ ] Manage
 - [ ] Capture
-- [ ] Core
+- [ ] Shared contracts
 - [ ] Web
-- [ ] Desktop
 - [ ] Android
 - [ ] iOS
 - [ ] Documentation

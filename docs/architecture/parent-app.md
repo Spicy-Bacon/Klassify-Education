@@ -11,7 +11,10 @@ The parent experience answers four questions:
 - What has changed?
 - What do I need to do next?
 
-The initial scope is Parent Home, Children, Announcements, and Settings. Forms, calendar, leave requests, messaging, media, AI, payments, push notifications, production authentication, production API, and production persistence remain deferred.
+The development scope is Parent Home, Children, Announcements, Forms and
+Settings. Calendar, leave requests, messaging, media, AI, payments,
+notification delivery and production authentication/API/persistence remain
+deferred. Separate mobile binaries versus one role-aware app stays open.
 
 ## Shared Behaviour
 
@@ -59,7 +62,7 @@ Key areas:
 - `parent/model`: mobile-facing parent DTOs.
 - `parent/data`: repository interfaces and development repository.
 - `parent/service`: service boundary and development composition.
-- `parent/ui`: Compose screens for Home, Announcements, Children, Settings, and shared state views.
+- `parent/ui`: Compose screens for Home, Announcements, Forms, Children, Settings, and shared state views.
 
 ## iOS Architecture
 
@@ -79,6 +82,7 @@ Both native apps expose the same V1 information architecture:
 
 - Home
 - Announcements
+- Forms
 - Children
 - Settings
 
@@ -99,4 +103,7 @@ The initial preference options are English and Traditional Chinese. Full screen 
 
 ## Future Modules
 
-Forms/reply slips are the next product stage. Calendar, leave requests, messaging, media galleries, notifications, and AI should plug into the same parent session, linked-child, and authorised-resource boundaries.
+Forms/reply slips already have a development implementation. Calendar, leave
+requests, messaging, notifications and AI remain pilot backlog. Initial media
+administration and galleries are web-based under
+[ADR 0001](decisions/0001-web-mobile-product-surfaces.md).

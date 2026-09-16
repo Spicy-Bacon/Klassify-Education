@@ -6,7 +6,7 @@ This file contains repository-level instructions for coding agents working on Kl
 
 - The customer-facing product name is exactly **Klassify**.
 - Do not display **Klassify Education** in user-facing application titles, headings, labels, or marketing copy.
-- Existing technical identifiers may retain `education` where they are implementation details, including the repository name, Android package/application ID, CMake project identifier, and similar internal names. Do not rename those unless a milestone explicitly requires it.
+- Existing technical identifiers may retain `education` where they are implementation details, including the repository name, Android package/application ID, and similar internal names. Do not rename those unless a milestone explicitly requires it.
 - Product pillars are **Connect**, **Manage**, and **Capture**.
 - AI should assist, draft, and summarise. It must not quietly make consequential school decisions.
 
@@ -49,6 +49,11 @@ UI
 
 ## Platform conventions
 
+- Active experiences: Admin Web, native Staff Mobile, native Parent Mobile, and Student Mobile or responsive web as pilot needs determine.
+- Media administration, uploads, galleries, events, consent and selections belong on web initially.
+- Separate mobile apps versus one role-aware app remains an open packaging decision.
+- The approved surface decision supersedes the provisional desktop/C++ direction in Product Definition v0.1; see [ADR 0001](docs/architecture/decisions/0001-web-mobile-product-surfaces.md).
+
 ### Web
 
 - React + TypeScript + Vite.
@@ -71,9 +76,9 @@ UI
 
 ### C++ / Desktop
 
-- C++20 shared core.
-- Qt desktop client remains a focused foundation for future media-heavy/operator workflows.
-- Avoid broad C++ refactors during unrelated product milestones.
+- Desktop is deferred pending evidence for high-volume ingest, offline upload queues, camera/Lightroom integration, intensive local processing or live-event operations.
+- C++ is a possible future choice for measured performance-critical workloads, not the default application engine or backend language.
+- Do not recreate the removed placeholder core, desktop build or CI without a new evidence-backed decision.
 
 ## Validation
 
@@ -93,14 +98,6 @@ Android:
 cd apps/android
 .\gradlew.bat testDebugUnitTest
 .\gradlew.bat assembleDebug
-```
-
-C++ when CMake is available:
-
-```bash
-cmake -S . -B build
-cmake --build build
-ctest --test-dir build --output-on-failure
 ```
 
 For iOS on non-macOS environments, run only supported non-UI Swift type-checks and state the limitation accurately.

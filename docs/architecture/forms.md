@@ -77,6 +77,11 @@ Android and iOS mirror the same boundary in native parent clients with developme
 
 ## Deferred
 
+A consent question records a form answer; it does not implement a complete
+Media Consent Centre with scope, withdrawal and media access enforcement.
+Recording a reminder request is not push, email or SMS delivery. Future media
+selection/ordering does not authorise payment processing.
+
 - Production authentication and identity provider integration.
 - Production database and API implementation.
 - Push/email/SMS reminder delivery.

@@ -1,5 +1,11 @@
 # Parent App Development Progress
 
+Historical milestone record: validation, limitations and next actions below
+describe that milestone at the time. Desktop/C++ scaffolding was subsequently
+removed under [ADR 0001](../architecture/decisions/0001-web-mobile-product-surfaces.md).
+Use the [current validation guide](validation.md) and [roadmap](../product/mvp-roadmap.md)
+for present work.
+
 Branch: feature/parent-app
 Phase: Phase 4 - Parent App V1
 

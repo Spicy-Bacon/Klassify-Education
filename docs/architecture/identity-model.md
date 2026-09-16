@@ -153,8 +153,11 @@ The web app consumes shared identity contracts through `@klassify/contracts` ins
 - Identity sync with external systems.
 - Attendance, messaging, media, AI and reporting domains.
 
-## C++ Core Decision
+## Shared Contract Decision
 
 Identity contracts currently live in `packages/contracts` as TypeScript platform-neutral definitions because this feature is primarily a data contract, service boundary and Admin Web prototype. No C++ identity logic was added because there is no performance-sensitive native identity behavior yet.
 
-The C++ core remains available for shared native logic where native performance provides material value, such as future media, audio, video or high-performance client engine work.
+The placeholder root core has since been removed under
+[ADR 0001](decisions/0001-web-mobile-product-surfaces.md). Contracts and native
+models remain unchanged; C++ is only a future option for measured performance
+needs, not a required identity engine.
