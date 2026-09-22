@@ -1,0 +1,15 @@
+package com.klassify.education.dev
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import com.klassify.education.dev.app.KlassifyApp
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            KlassifyApp(isDevelopmentBuild = BuildConfig.DEBUG)
+        }
+    }
+}
